@@ -1,5 +1,5 @@
 <script lang="ts">
-    import TodoApp from "$lib/components/TodoApp.svelte";
+    import TodoApp from "$lib/components/TodoApp/TodoApp.svelte";
 </script>
 
 <div class="container mx-auto px-4 py-8">

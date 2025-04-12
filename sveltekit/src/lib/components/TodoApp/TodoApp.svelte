@@ -1,7 +1,7 @@
 <script lang="ts">
     import { initTodoStore } from "$lib/stores/todo-store.svelte";
-    import TodoForm from "./TodoForm.svelte";
-    import TodoList from "./TodoList.svelte";
+    import TodoForm from "$lib/components/TodoApp/TodoForm.svelte";
+    import TodoList from "$lib/components/TodoApp/TodoList.svelte";
 
     // Initialize the TodoStore
     const TodoStore = initTodoStore();
