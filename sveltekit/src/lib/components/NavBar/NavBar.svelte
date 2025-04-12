@@ -6,7 +6,7 @@
     
     // Navigation links
     const navLinks = $state([
-        { name: 'Home', href: '/', active: true },
+        { name: 'Home', href: './', active: true },
         { name: 'Projects', href: '/projects', active: false },
         { name: 'About', href: '/about', active: false },
         { name: 'Contact', href: '/contact', active: false }
