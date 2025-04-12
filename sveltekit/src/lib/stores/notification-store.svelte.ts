@@ -47,14 +47,14 @@ export class NotificationStore {
         });
     }
 
-    add(options: { 
-        type: NotificationType; 
-        message: string; 
-        title?: string; 
+    add(options: {
+        type: NotificationType;
+        message: string;
+        title?: string;
         autoClose?: boolean;
     }) {
         const { type, message, title, autoClose = true } = options;
-        
+
         const id = crypto.randomUUID();
         const notification: Notification = {
             id,
@@ -79,15 +79,15 @@ export class NotificationStore {
     }
 
     dismiss(id: string) {
-        this.notifications = this.notifications.map(notification => 
-            notification.id === id 
+        this.notifications = this.notifications.map(notification =>
+            notification.id === id
                 ? { ...notification, dismissed: true }
                 : notification
         );
     }
 
     remove(id: string) {
-        this.notifications = this.notifications.filter(notification => 
+        this.notifications = this.notifications.filter(notification =>
             notification.id !== id
         );
     }
@@ -100,7 +100,7 @@ export class NotificationStore {
     }
 
     clearHistory() {
-        this.notifications = this.notifications.filter(notification => 
+        this.notifications = this.notifications.filter(notification =>
             !notification.dismissed
         );
     }
@@ -134,8 +134,8 @@ export class NotificationStore {
     // Get history notifications (dismissed)
     get historyNotifications() {
         return this.notifications
-                .filter(notification => notification.dismissed)
-                .sort((a, b) => b.timestamp - a.timestamp);
+            .filter(notification => notification.dismissed)
+            .sort((a, b) => b.timestamp - a.timestamp);
     }
 }
 
