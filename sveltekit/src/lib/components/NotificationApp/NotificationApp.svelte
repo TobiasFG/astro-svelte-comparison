@@ -84,15 +84,4 @@
             Persistent Notification
         </button>
     </div>
-
-    <div class="mt-6 border-t border-gray-200 pt-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">How It Works</h3>
-        <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
-            <li>Notifications appear in the bottom right corner</li>
-            <li>Standard notifications disappear after 4 seconds</li>
-            <li>Persistent notifications stay until manually dismissed</li>
-            <li>Click the "Show History" button to view past notifications</li>
-            <li>All notifications are stored in the browser's local storage</li>
-        </ul>
-    </div>
 </div>
