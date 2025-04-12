@@ -1,21 +1,22 @@
 <script lang="ts">
+    import { page } from '$app/stores';
+
     const { title = "My Application" } = $props<{
         title?: string;
     }>();
     
-    // Navigation links
-    const navLinks = $state([
-        { name: 'Home', href: './', active: true },
-        { name: 'Projects', href: '/projects', active: false },
-        { name: 'About', href: '/about', active: false },
-        { name: 'Contact', href: '/contact', active: false }
-    ]);
-    
-    // Function to handle navigation
-    function setActiveLink(index: number) {
-        navLinks.forEach((link, i) => {
-            link.active = i === index;
-        });
+    // Navigation links with proper paths
+    const navLinks = [
+        { name: 'Home', href: '/' },
+        { name: 'Blog', href: '/blog' }
+    ];
+
+    // Helper function to check if a link is active based on current path
+    function isActive(href: string): boolean {
+        // Check if the current URL pathname starts with the link's href
+        // This ensures that sub-pages of a section also highlight the main nav item
+        return $page.url.pathname === href || 
+               ($page.url.pathname.startsWith(href) && href !== '/');
     }
 </script>
 
@@ -32,17 +33,14 @@
             
             <!-- Navigation Links -->
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {#each navLinks as link, index}
+                {#each navLinks as link}
                     <a 
                         href={link.href} 
                         class={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium
-                            ${link.active 
+                            ${isActive(link.href)
                                 ? 'border-blue-500 text-gray-900' 
                                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
-                        onclick={(e) => {
-                            if (link.href === '/') e.preventDefault();
-                            setActiveLink(index);
-                        }}
+                        aria-current={isActive(link.href) ? 'page' : undefined}
                     >
                         {link.name}
                     </a>
@@ -70,17 +68,14 @@
     <!-- Mobile menu, show/hide based on menu state -->
     <div class="sm:hidden hidden" id="mobile-menu">
         <div class="pt-2 pb-3 space-y-1">
-            {#each navLinks as link, index}
+            {#each navLinks as link}
                 <a
                     href={link.href}
                     class={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium
-                        ${link.active
+                        ${isActive(link.href)
                             ? 'bg-blue-50 border-blue-500 text-blue-700'
                             : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'}`}
-                    onclick={(e) => {
-                        if (link.href === '/') e.preventDefault();
-                        setActiveLink(index);
-                    }}
+                    aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                     {link.name}
                 </a>
