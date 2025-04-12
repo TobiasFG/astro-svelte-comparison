@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { getNotificationStore } from "$lib/stores/notification-store.svelte";
 
     const notificationStore = getNotificationStore();
@@ -42,46 +42,70 @@
     }
 </script>
 
+{#snippet notificationButton(
+    onClick: () => void,
+    borderColor: string,
+    textColor: string,
+    hoverBgColor: string,
+    label: string,
+)}
+    <button
+        on:click={onClick}
+        class="px-4 py-2 bg-white border-2 {borderColor} {textColor} rounded-md hover:{hoverBgColor} hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-opacity-50 {borderColor.replace(
+            'border',
+            'focus:ring',
+        )}"
+        aria-label={label}
+    >
+        {label}
+    </button>
+{/snippet}
+
 <div class="flex flex-col justify-center">
     <h2 class="text-xl font-bold text-gray-900 mb-4">Notification Demo</h2>
     <p class="text-gray-600 mb-6">
         Click the buttons below to trigger different types of notifications
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <button
-            on:click={showErrorNotification}
-            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-            Error Notification
-        </button>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {@render notificationButton(
+            showErrorNotification,
+            "border-red-500",
+            "text-red-600",
+            "bg-red-500",
+            "Error Notification",
+        )}
 
-        <button
-            on:click={showSuccessNotification}
-            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-            Success Notification
-        </button>
+        {@render notificationButton(
+            showSuccessNotification,
+            "border-green-500",
+            "text-green-600",
+            "bg-green-500",
+            "Success Notification",
+        )}
 
-        <button
-            on:click={showWarningNotification}
-            class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-        >
-            Warning Notification
-        </button>
+        {@render notificationButton(
+            showWarningNotification,
+            "border-amber-500",
+            "text-amber-600",
+            "bg-amber-500",
+            "Warning Notification",
+        )}
 
-        <button
-            on:click={showInfoNotification}
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-            Info Notification
-        </button>
+        {@render notificationButton(
+            showInfoNotification,
+            "border-blue-500",
+            "text-blue-600",
+            "bg-blue-500",
+            "Info Notification",
+        )}
 
-        <button
-            on:click={showPersistentNotification}
-            class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-        >
-            Persistent Notification
-        </button>
+        {@render notificationButton(
+            showPersistentNotification,
+            "border-purple-500",
+            "text-purple-600",
+            "bg-purple-500",
+            "Persistent Notification",
+        )}
     </div>
 </div>
