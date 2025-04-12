@@ -1,8 +1,13 @@
 <script lang="ts">
     import "../app.css";
     import NavBar from "$lib/components/NavBar/NavBar.svelte";
+    import NotificationCenter from "$lib/components/NotificationApp/NotificationCenter.svelte";
+    import { initNotificationStore } from "$lib/stores/notification-store.svelte";
 
     let { children } = $props();
+
+    // Initialize the notification store
+    const notificationStore = initNotificationStore();
 </script>
 
 <svelte:head>
@@ -19,3 +24,5 @@
         {@render children()}
     </main>
 </div>
+
+<NotificationCenter />

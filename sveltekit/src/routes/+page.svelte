@@ -1,5 +1,9 @@
 <script lang="ts">
     import TodoApp from "$lib/components/TodoApp/TodoApp.svelte";
+    import * as TimerAppModule from "$lib/components/TimerApp/TimerApp.svelte";
+    import NotificationApp from "$lib/components/NotificationApp/NotificationApp.svelte";
+    
+    const TimerApp = TimerAppModule.default || TimerAppModule;
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -11,13 +15,13 @@
             <TodoApp />
         </div>
         
-        <!-- Placeholder for additional apps -->
-        <div class="flex items-center justify-center bg-white rounded-lg shadow-lg p-6 min-h-[300px] ">
-            <p class="text-gray-500 text-center">App Placeholder 1</p>
+        <!-- Timer App -->
+        <div class="bg-white rounded-lg shadow-lg ">
+            <TimerApp />
         </div>
         
         <div class="flex items-center justify-center bg-white rounded-lg shadow-lg p-6 min-h-[300px] ">
-            <p class="text-gray-500 text-center">App Placeholder 2</p>
+            <NotificationApp />
         </div>
         
         <div class="flex items-center justify-center bg-white rounded-lg shadow-lg p-6 min-h-[300px] ">
