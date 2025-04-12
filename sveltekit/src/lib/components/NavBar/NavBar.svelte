@@ -1,4 +1,3 @@
-<!-- filepath: /Users/tfg/Documents/astro-svelte-comparison/sveltekit/src/lib/components/NavBar/NavBar.svelte -->
 <script lang="ts">
     const { title = "My Application" } = $props<{
         title?: string;
