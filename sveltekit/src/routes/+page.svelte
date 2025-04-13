@@ -35,24 +35,14 @@
             </div>
 
             <!-- Notification App -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div
+                class=" col-span-2 bg-white rounded-lg shadow-lg overflow-hidden"
+            >
                 <div class="p-4 bg-gray-50 border-b">
                     <h3 class="font-medium text-gray-800">Notification App</h3>
                 </div>
                 <div class="flex items-center justify-center p-6 min-h-[250px]">
                     <NotificationApp />
-                </div>
-            </div>
-
-            <!-- Client-side Data Loading App -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="p-4 bg-gray-50 border-b">
-                    <h3 class="font-medium text-gray-800">
-                        Client-side Data Loading
-                    </h3>
-                </div>
-                <div class="p-6">
-                    <ClientDataApp />
                 </div>
             </div>
         </div>
@@ -100,6 +90,20 @@
                     The component above demonstrates client-side data loading
                     with proper loading and error states.
                 </p>
+            </div>
+
+            <!-- Client-side Data Loading App -->
+            <div
+                class=" col-span-2 bg-white rounded-lg shadow-lg overflow-hidden"
+            >
+                <div class="p-4 bg-gray-50 border-b">
+                    <h3 class="font-medium text-gray-800">
+                        Client-side Data Loading
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <ClientDataApp />
+                </div>
             </div>
         </div>
     </section>

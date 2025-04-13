@@ -1,12 +1,12 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
-    
+
     const { onSubmit } = $props<{
         onSubmit: (todo: string) => void;
     }>();
-    
+
     let newTodo = $state("");
-    
+
     function handleSubmit(e: Event) {
         e.preventDefault();
         if (newTodo.trim()) {
@@ -16,11 +16,7 @@
     }
 </script>
 
-<form 
-    class="mb-6 flex gap-2" 
-    onsubmit={handleSubmit}
-    use:enhance
->
+<form class="mb-6 flex gap-2" onsubmit={handleSubmit}>
     <input
         type="text"
         bind:value={newTodo}

@@ -40,6 +40,14 @@ const products = [
     }
 ];
 
+export type Product = {
+    id: number;
+    name: string;
+    price: number;
+    description: string;
+    image: string;
+};
+
 export const GET: RequestHandler = async ({ url }) => {
     // Parse query parameters
     const delay = Number(url.searchParams.get('delay') || '1000');
@@ -50,6 +58,6 @@ export const GET: RequestHandler = async ({ url }) => {
     // Return mock product data
     return json({
         products,
-        timestamp: new Date().toISOString()
+        timestamp: new Date()
     });
 };
