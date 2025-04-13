@@ -11,19 +11,54 @@
         };
     }>();
 
-    // Track when the client-side component mounted
+    // Track when the client-side component mounted for comparison purposes
+    let clientTime = $state(new Date());
+    let buildTimeAgo = $state("");
+    let timerInterval = $state<ReturnType<typeof setInterval> | null>(null);
+    let hydrated = $state(false);
+
+    // Calculate how long since build time
     $effect(() => {
         // This will not change the pre-rendered content,
         // but will update the client time display after hydration
-        clientTime = new Date();
+        hydrated = true;
+
+        const calculateTimeSinceBuild = () => {
+            clientTime = new Date();
+
+            // If we have build date, calculate time since then
+            if (data.buildDate) {
+                const buildDate = new Date(data.buildDate);
+                const now = new Date();
+
+                // Calculate difference in milliseconds
+                const diffMs = now.getTime() - buildDate.getTime();
+
+                // Convert to relative time format
+                if (diffMs < 60000) {
+                    buildTimeAgo = `${Math.round(diffMs / 1000)} seconds ago`;
+                } else if (diffMs < 3600000) {
+                    buildTimeAgo = `${Math.round(diffMs / 60000)} minutes ago`;
+                } else if (diffMs < 86400000) {
+                    buildTimeAgo = `${Math.round(diffMs / 3600000)} hours ago`;
+                } else {
+                    buildTimeAgo = `${Math.round(diffMs / 86400000)} days ago`;
+                }
+            }
+        };
+
+        // Initial calculation
+        calculateTimeSinceBuild();
+
+        // Update every second to keep time accurate
+        timerInterval = setInterval(calculateTimeSinceBuild, 1000);
     });
 
-    let clientTime = $state(new Date());
-
-    // Update the client time every second
-    setInterval(() => {
-        clientTime = new Date();
-    }, 1000);
+    // Cleanup interval on unmount
+    import { onDestroy } from "svelte";
+    onDestroy(() => {
+        if (timerInterval) clearInterval(timerInterval);
+    });
 </script>
 
 <svelte:head>

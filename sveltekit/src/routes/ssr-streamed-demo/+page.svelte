@@ -110,17 +110,32 @@
             {#await data.streamedData}
                 <div
                     class="flex flex-col items-center justify-center space-y-4 py-12 border-2 border-dashed border-purple-200 rounded-lg"
+                    role="status"
+                    aria-live="polite"
                 >
                     <div
                         class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"
+                        aria-hidden="true"
                     ></div>
                     <div class="text-center">
                         <p class="text-gray-700 font-medium">
                             Streaming data from server...
                         </p>
                         <p class="text-sm text-gray-500 mt-1">
-                            Started at: {streamingStartTime.toLocaleTimeString()}
+                            Started at: <time
+                                dateTime={streamingStartTime.toISOString()}
+                                >{streamingStartTime.toLocaleTimeString()}</time
+                            >
                         </p>
+                        <div class="mt-4 w-full max-w-xs mx-auto">
+                            <div
+                                class="bg-gray-200 h-1.5 rounded-full overflow-hidden"
+                            >
+                                <div
+                                    class="h-full bg-purple-500 rounded-full animate-pulse-width"
+                                ></div>
+                            </div>
+                        </div>
                         <p class="text-purple-600 mt-3 text-sm font-medium">
                             Notice you can interact with the page while data
                             loads!
@@ -129,41 +144,54 @@
                 </div>
             {:then random}
                 {onDataReceived()}
-                <div class="space-y-6">
-                    <div class="bg-gray-50 p-6 rounded-md">
-                        <h3 class="font-medium text-lg mb-4">Random Data:</h3>
+                <div class="space-y-6 animate-fade-in">
+                    <div class="bg-gray-50 p-6 rounded-md shadow-sm">
+                        <h3 class="font-medium text-lg mb-4 text-gray-800">
+                            Random Data:
+                        </h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm text-gray-500">ID</p>
-                                <p class="font-mono bg-gray-100 p-2 rounded">
+                                <p class="text-sm text-gray-500 mb-1">ID</p>
+                                <p
+                                    class="font-mono bg-gray-100 p-2 rounded text-sm break-all"
+                                >
                                     {random.id}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Title</p>
+                                <p class="text-sm text-gray-500 mb-1">Title</p>
                                 <p class="font-medium">{random.title}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Date</p>
-                                <p>{new Date(random.date).toLocaleString()}</p>
+                                <p class="text-sm text-gray-500 mb-1">Date</p>
+                                <p>
+                                    <time
+                                        dateTime={new Date(
+                                            random.date,
+                                        ).toISOString()}
+                                    >
+                                        {new Date(random.date).toLocaleString()}
+                                    </time>
+                                </p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Number</p>
+                                <p class="text-sm text-gray-500 mb-1">Number</p>
                                 <p class="font-mono">{random.number}</p>
                             </div>
                         </div>
                     </div>
 
                     <div
-                        class="bg-purple-50 p-4 rounded-md border border-purple-100"
+                        class="bg-purple-50 p-5 rounded-md border border-purple-100 shadow-sm"
                     >
-                        <div class="flex items-center gap-2 mb-2">
+                        <div class="flex items-center gap-2 mb-3">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 class="h-5 w-5 text-purple-500"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
+                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -172,31 +200,61 @@
                                     d="M13 10V3L4 14h7v7l9-11h-7z"
                                 />
                             </svg>
-                            <h3 class="font-medium">Streaming Performance</h3>
+                            <h3 class="font-medium text-gray-800">
+                                Streaming Performance
+                            </h3>
                         </div>
-                        <ul class="space-y-1 text-sm">
-                            <li>
-                                <span class="font-medium">Stream started:</span>
-                                {streamingStartTime.toLocaleTimeString()}
-                            </li>
-                            <li>
-                                <span class="font-medium"
-                                    >Stream completed:</span
-                                >
-                                {streamingCompleteTime?.toLocaleTimeString()}
-                            </li>
-                            <li>
-                                <span class="font-medium"
-                                    >Streaming duration:</span
-                                >
-                                {streamingDuration}ms
-                            </li>
-                        </ul>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Stream started:</span
+                                    >
+                                    <time
+                                        dateTime={streamingStartTime.toISOString()}
+                                        class="font-mono text-purple-700"
+                                    >
+                                        {streamingStartTime.toLocaleTimeString()}
+                                    </time>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Stream completed:</span
+                                    >
+                                    {#if streamingCompleteTime}
+                                        <time
+                                            dateTime={streamingCompleteTime.toISOString()}
+                                            class="font-mono text-purple-700"
+                                        >
+                                            {streamingCompleteTime.toLocaleTimeString()}
+                                        </time>
+                                    {/if}
+                                </li>
+                            </ul>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Streaming duration:</span
+                                    >
+                                    <span class="font-mono text-purple-700"
+                                        >{streamingDuration}ms</span
+                                    >
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Status:</span
+                                    >
+                                    <span class="text-green-600">Complete</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             {:catch error}
                 <div
-                    class="bg-red-100 border-l-4 border-red-500 p-4 mb-4 rounded"
+                    class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md shadow-sm"
+                    role="alert"
+                    aria-labelledby="streaming-error-heading"
                 >
                     <div class="flex items-center">
                         <svg
@@ -204,6 +262,7 @@
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
+                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -212,15 +271,34 @@
                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
-                        <p class="text-red-700">
+                        <h3
+                            id="streaming-error-heading"
+                            class="text-red-700 font-medium"
+                        >
                             Error: {error.message || "Failed to stream data"}
-                        </p>
+                        </h3>
                     </div>
-                    {#if streamingDuration}
-                        <p class="mt-2 text-sm text-red-600">
-                            Error occurred after {streamingDuration}ms
+                    <div class="mt-3 space-y-2">
+                        {#if streamingDuration}
+                            <p class="text-sm text-red-600">
+                                Error occurred after {streamingDuration}ms of
+                                streaming
+                            </p>
+                        {/if}
+                        <p class="text-sm text-gray-600">
+                            The server was unable to complete the streaming
+                            operation. This demonstrates how SSR streaming
+                            handles errors - the page is still interactive and
+                            usable even when data streaming fails.
                         </p>
-                    {/if}
+                        <a
+                            href="/ssr-streamed-demo"
+                            class="inline-block mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                            aria-label="Retry loading streaming data"
+                        >
+                            Retry Streaming
+                        </a>
+                    </div>
                 </div>
             {/await}
         </div>

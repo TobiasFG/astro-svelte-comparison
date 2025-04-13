@@ -1,6 +1,82 @@
 <script lang="ts">
-    // Import data from the page load
-    export let data;
+    import type { RandomData } from "../api/test/+server";
+    import { onMount } from "svelte";
+
+    // Use Svelte 5 runes for page data
+    interface PageData {
+        random: RandomData | null;
+        renderedAt: string;
+        loadTime: number | null;
+        error: string | null;
+    }
+
+    // Page data using Svelte 5 runes syntax
+    const { data } = $props<{ data: PageData }>();
+
+    // Client-side rendering time for comparison
+    let clientRenderTime = $state(new Date().toLocaleTimeString());
+    let timeElapsed = $state(0);
+    let timerInterval = $state<ReturnType<typeof setInterval> | null>(null);
+
+    // Calculate time elapsed since server rendering
+    $effect(() => {
+        if (data?.renderedAt) {
+            const updateElapsedTime = () => {
+                try {
+                    // Extract hours, minutes, seconds from the server time
+                    const [time, period] = data.renderedAt.split(" ");
+                    const [hours, minutes, seconds] = time
+                        .split(":")
+                        .map(Number);
+
+                    // Adjust for AM/PM if present
+                    let serverHours = hours;
+                    if (period?.toLowerCase() === "pm" && hours < 12) {
+                        serverHours += 12;
+                    } else if (period?.toLowerCase() === "am" && hours === 12) {
+                        serverHours = 0;
+                    }
+
+                    // Create server date object for today with the rendered time
+                    const serverDate = new Date();
+                    serverDate.setHours(serverHours, minutes, seconds || 0);
+
+                    // Calculate difference in seconds
+                    const now = new Date();
+                    timeElapsed = Math.floor(
+                        (now.getTime() - serverDate.getTime()) / 1000,
+                    );
+
+                    // Update client render time
+                    clientRenderTime = now.toLocaleTimeString();
+                } catch (e) {
+                    // Fallback if time parsing fails
+                    console.error("Error parsing server time:", e);
+                }
+            };
+
+            // Initial calculation
+            updateElapsedTime();
+
+            // Update every second
+            timerInterval = setInterval(updateElapsedTime, 1000);
+        }
+    });
+
+    // Cleanup interval on unmount
+    onMount(() => {
+        return () => {
+            if (timerInterval) clearInterval(timerInterval);
+        };
+    });
+
+    // Format time elapsed into a human-readable string
+    const formattedTimeElapsed = $derived(() => {
+        if (timeElapsed < 60) return `${timeElapsed} seconds`;
+        const minutes = Math.floor(timeElapsed / 60);
+        const seconds = timeElapsed % 60;
+        return `${minutes} minute${minutes !== 1 ? "s" : ""} ${seconds} second${seconds !== 1 ? "s" : ""}`;
+    });
 </script>
 
 <svelte:head>
@@ -52,9 +128,36 @@
                 </a>
             </div>
 
+            <div
+                class="mb-4 bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-md"
+            >
+                <div class="flex items-center">
+                    <svg
+                        class="h-6 w-6 text-indigo-500 mr-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <p class="text-indigo-700">
+                        <span class="font-medium">Server-Side Rendered:</span>
+                        This page was rendered on the server {formattedTimeElapsed}
+                        ago.
+                    </p>
+                </div>
+            </div>
+
             {#if data?.error}
                 <div
-                    class="bg-red-100 border-l-4 border-red-500 p-4 mb-4 rounded"
+                    class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md"
+                    role="alert"
                 >
                     <div class="flex items-center">
                         <svg
@@ -62,6 +165,7 @@
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
+                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -70,49 +174,66 @@
                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
-                        <p class="text-red-700">Error: {data.error}</p>
+                        <h3 class="text-red-700 font-medium">
+                            Error: {data.error}
+                        </h3>
                     </div>
+                    <p class="mt-2 text-sm text-red-600">
+                        This error occurred on the server during page rendering.
+                        Try refreshing the page.
+                    </p>
                 </div>
             {:else if data?.random}
                 <div class="space-y-6">
-                    <div class="bg-gray-50 p-6 rounded-md">
-                        <h3 class="font-medium text-lg mb-4">Random Data:</h3>
+                    <div class="bg-gray-50 p-6 rounded-md shadow-sm">
+                        <h3 class="font-medium text-lg mb-4 text-gray-800">
+                            Random Data:
+                        </h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm text-gray-500">ID</p>
-                                <p class="font-mono bg-gray-100 p-2 rounded">
+                                <p class="text-sm text-gray-500 mb-1">ID</p>
+                                <p
+                                    class="font-mono bg-gray-100 p-2 rounded text-sm break-all"
+                                >
                                     {data.random.id}
                                 </p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Title</p>
+                                <p class="text-sm text-gray-500 mb-1">Title</p>
                                 <p class="font-medium">{data.random.title}</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Date</p>
+                                <p class="text-sm text-gray-500 mb-1">Date</p>
                                 <p>
-                                    {new Date(
-                                        data.random.date,
-                                    ).toLocaleString()}
+                                    <time
+                                        datetime={new Date(
+                                            data.random.date,
+                                        ).toISOString()}
+                                    >
+                                        {new Date(
+                                            data.random.date,
+                                        ).toLocaleString()}
+                                    </time>
                                 </p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Number</p>
+                                <p class="text-sm text-gray-500 mb-1">Number</p>
                                 <p class="font-mono">{data.random.number}</p>
                             </div>
                         </div>
                     </div>
 
                     <div
-                        class="bg-blue-50 p-4 rounded-md border border-blue-100"
+                        class="bg-indigo-50 p-5 rounded-md border border-indigo-100 shadow-sm"
                     >
-                        <div class="flex items-center gap-2 mb-2">
+                        <div class="flex items-center gap-2 mb-3">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5 text-blue-500"
+                                class="h-5 w-5 text-indigo-500"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
+                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -121,28 +242,56 @@
                                     d="M13 10V3L4 14h7v7l9-11h-7z"
                                 />
                             </svg>
-                            <h3 class="font-medium">Performance Metrics</h3>
+                            <h3 class="font-medium text-gray-800">
+                                Performance Metrics
+                            </h3>
                         </div>
-                        <ul class="space-y-1 text-sm">
-                            <li>
-                                <span class="font-medium"
-                                    >Server load time:</span
-                                >
-                                {data.loadTime}ms
-                            </li>
-                            <li>
-                                <span class="font-medium"
-                                    >Server rendered at:</span
-                                >
-                                {data.renderedAt}
-                            </li>
-                            <li>
-                                <span class="font-medium"
-                                    >Current client time:</span
-                                >
-                                {new Date().toLocaleTimeString()}
-                            </li>
-                        </ul>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Server load time:</span
+                                    >
+                                    <span class="font-mono text-indigo-800"
+                                        >{data.loadTime}ms</span
+                                    >
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Server rendered at:</span
+                                    >
+                                    <span>{data.renderedAt}</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Time since render:</span
+                                    >
+                                    <span>{formattedTimeElapsed}</span>
+                                </li>
+                            </ul>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Client time now:</span
+                                    >
+                                    <span>{clientRenderTime}</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >JavaScript:</span
+                                    >
+                                    <span class="text-green-600">Hydrated</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="font-medium text-gray-600"
+                                        >Rendering:</span
+                                    >
+                                    <span class="text-indigo-600"
+                                        >Server-side</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             {/if}
