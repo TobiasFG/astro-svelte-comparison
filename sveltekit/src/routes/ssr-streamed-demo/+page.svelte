@@ -19,12 +19,30 @@
     let streamingCompleteTime = $state<Date | null>(null);
     let streamingDuration = $state<number | null>(null);
 
-    // This will run when the data from streamedData promise resolves
-    function onDataReceived() {
-        streamingCompleteTime = new Date();
-        streamingDuration =
-            streamingCompleteTime.getTime() - streamingStartTime.getTime();
-    }
+    // Track if data has been loaded (to avoid multiple effect triggers)
+    let dataLoaded = $state(false);
+
+    // Use $effect to react when streamed data is available
+    $effect(() => {
+        if (!dataLoaded && data.streamedData instanceof Promise) {
+            data.streamedData
+                .then(() => {
+                    streamingCompleteTime = new Date();
+                    streamingDuration =
+                        streamingCompleteTime.getTime() -
+                        streamingStartTime.getTime();
+                    dataLoaded = true;
+                })
+                .catch(() => {
+                    // Handle error case - still record timing
+                    streamingCompleteTime = new Date();
+                    streamingDuration =
+                        streamingCompleteTime.getTime() -
+                        streamingStartTime.getTime();
+                    dataLoaded = true;
+                });
+        }
+    });
 </script>
 
 <svelte:head>
@@ -143,7 +161,6 @@
                     </div>
                 </div>
             {:then random}
-                {onDataReceived()}
                 <div class="space-y-6 animate-fade-in">
                     <div class="bg-gray-50 p-6 rounded-md shadow-sm">
                         <h3 class="font-medium text-lg mb-4 text-gray-800">

@@ -1,6 +1,16 @@
 <script lang="ts">
-    import type { RandomData } from "../api/test/+server";
+    function formatTimeElapsed(time: number): string {
+        if (time < 60) return `${time} seconds`;
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes} minute${minutes !== 1 ? "s" : ""} ${seconds} second${seconds !== 1 ? "s" : ""}`;
+    }
+
+    // Create a derived value that formats the time elapsed
+    let timeElapsed = $state(0);
+    const formattedTimeElapsed = $derived(formatTimeElapsed(timeElapsed));
     import { onMount } from "svelte";
+    import type { RandomData } from "../api/test/+server";
 
     // Use Svelte 5 runes for page data
     interface PageData {
@@ -15,7 +25,7 @@
 
     // Client-side rendering time for comparison
     let clientRenderTime = $state(new Date().toLocaleTimeString());
-    let timeElapsed = $state(0);
+
     let timerInterval = $state<ReturnType<typeof setInterval> | null>(null);
 
     // Calculate time elapsed since server rendering
@@ -68,14 +78,6 @@
         return () => {
             if (timerInterval) clearInterval(timerInterval);
         };
-    });
-
-    // Format time elapsed into a human-readable string
-    const formattedTimeElapsed = $derived(() => {
-        if (timeElapsed < 60) return `${timeElapsed} seconds`;
-        const minutes = Math.floor(timeElapsed / 60);
-        const seconds = timeElapsed % 60;
-        return `${minutes} minute${minutes !== 1 ? "s" : ""} ${seconds} second${seconds !== 1 ? "s" : ""}`;
     });
 </script>
 
