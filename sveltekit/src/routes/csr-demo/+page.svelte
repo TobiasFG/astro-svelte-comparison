@@ -1,16 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import type { RandomData } from "../api/test/+server";
 
-    /**
-     * Define types for our data - using proper TypeScript interfaces
-     * for better type safety and code documentation
-     */
-    interface RandomData {
-        id: string;
-        title: string;
-        date: string;
-        number: string;
-    }
+    let refreshCount = $state(0);
 
     // State management using Svelte 5 runes
     let data = $state<RandomData | null>(null);
@@ -19,7 +11,6 @@
     let loadStart = $state<Date | null>(null);
     let loadEnd = $state<Date | null>(null);
     let loadTime = $state<number | null>(null);
-    let refreshCount = $state(0);
 
     // Track metrics for analytics
     let metrics = $state({

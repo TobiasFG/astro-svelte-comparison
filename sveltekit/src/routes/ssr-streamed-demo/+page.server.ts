@@ -1,9 +1,10 @@
+import type { RandomData } from '../api/test/+server';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch }) => {
     // We'll create a promise that will resolve with the data from our API
     // This allows streaming the data to the client while the rest of the page is interactive
-    const dataPromise = new Promise(async (resolve, reject) => {
+    const dataPromise: Promise<RandomData> = new Promise(async (resolve, reject) => {
         try {
             // Fetch data from our test endpoint
             const response = await fetch('/api/test');

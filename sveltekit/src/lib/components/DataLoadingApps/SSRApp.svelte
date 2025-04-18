@@ -25,9 +25,10 @@
 </script>
 
 <div
+    role="article"
     class="bg-white rounded-lg shadow-lg p-6 min-h-[300px] relative overflow-hidden hover:shadow-xl transition-shadow duration-300"
-    on:mouseenter={() => (isHovered = true)}
-    on:mouseleave={() => (isHovered = false)}
+    onmouseenter={() => (isHovered = true)}
+    onmouseleave={() => (isHovered = false)}
 >
     <div
         class:opacity-0={!isVisible}

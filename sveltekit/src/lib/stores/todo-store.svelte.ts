@@ -55,9 +55,9 @@ export class TodoStore {
     }
 
     toggleComplete(id: string) {
-        this.todos = this.todos.map(todo => 
-            todo.id === id 
-                ? { ...todo, completed: !todo.completed } 
+        this.todos = this.todos.map(todo =>
+            todo.id === id
+                ? { ...todo, completed: !todo.completed }
                 : todo
         );
     }

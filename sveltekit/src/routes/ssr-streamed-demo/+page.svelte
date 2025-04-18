@@ -1,16 +1,6 @@
 <script lang="ts">
-    import type { RandomData } from "../api/test/+server";
-
-    // Use Svelte 5 runes for page data
-    const { data } = $props<{
-        data: {
-            streamedData: Promise<RandomData>;
-            pageInfo: {
-                title: string;
-                renderedAt: string;
-            };
-        };
-    }>();
+    import type { PageProps } from "./$types";
+    const { data }: PageProps = $props();
 
     // Track when streaming started on the client
     let streamingStartTime = $state(new Date());
@@ -88,6 +78,11 @@
                 <h2 class="text-xl font-semibold">Demo</h2>
                 <a
                     href="/ssr-streamed-demo"
+                    data-sveltekit-replacestate
+                    data-sveltekit-noscroll
+                    data-sveltekit-preload-data
+                    data-sveltekit-preload-code
+                    data-sveltekit-reload
                     class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                     Refresh Page
