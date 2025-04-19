@@ -1,63 +1,64 @@
 import { browser } from "$app/environment";
 import { getContext, setContext } from "svelte";
 
-/**
- * ClientPagePerformanceTracker is a class that tracks and exposes performance metrics for client pages
- */
 export class ClientPagePerformanceTracker {
-    // State variables controls
-    isOpen = $state<boolean>(false);
-    isLoading = $state<boolean>(true);
-
-    // Navigation Performance entries
-    RequestSentMark = $state<number | null>(null);
-    ResponseReceivedMark = $state<number | null>(null);
-    ResponseDownloadDuration = $state<number | null>(null);
-    ResponseCompleteMark = $state<number | null>(null);
-    DomInteractiveMark = $state<number | null>(null);
-    DomCompleteMark = $state<number | null>(null);
-
-    // Resource Performance entries
-    TotalResourceCount = $state<number>(0);
-    TotalResourceFromCacheCount = $state<number>(0);
-    TotalResourceDownloadTimeSpent = $state<number>(0);
-
+    isOpen = $state(false);
+    isLoading = $state(true);
+    requestSentMark = $state<number | null>(null);
+    responseReceivedMark = $state<number | null>(null);
+    responseDownloadDuration = $state<number | null>(null);
+    responseCompleteMark = $state<number | null>(null);
+    domInteractiveMark = $state<number | null>(null);
+    domCompleteMark = $state<number | null>(null);
+    totalResourceCount = $state(0);
+    totalResourceFromCacheCount = $state(0);
+    totalResourceDownloadTimeSpent = $state(0);
+    hasBlockingResources = $state(false);
+    recentResources = $state<PerformanceResourceTiming[]>([]);
 
     constructor() {
+
         if (browser) {
-            // Initialize performance tracking
             this.initializePerformanceTracking();
         }
     }
 
-    TogglePerformanceTracker() {
+    togglePerformanceTracker() {
         this.isOpen = !this.isOpen;
     }
 
-    initializePerformanceTracking() {
-        //entryTypes: ["element", "event", "first-input", "largest-contentful-paint", "layout-shift", "long-animation-frame", "longtask", "mark", "measure", "navigation", "paint", "resource", "visibility-state"],
+    private initializePerformanceTracking() {
         if (typeof window !== "undefined" && "PerformanceObserver" in window) {
             const performanceObserver = new PerformanceObserver((metrics) => {
                 metrics.getEntries().forEach((entry) => {
                     switch (entry.entryType) {
                         case "navigation":
-                            this.RequestSentMark = (entry as PerformanceNavigationTiming).requestStart;
-                            this.ResponseReceivedMark = (entry as PerformanceNavigationTiming).responseStart;
-                            this.ResponseDownloadDuration = (entry as PerformanceNavigationTiming).responseEnd - (entry as PerformanceNavigationTiming).responseStart;
-                            this.ResponseCompleteMark = (entry as PerformanceNavigationTiming).responseEnd;
-                            this.DomInteractiveMark = (entry as PerformanceNavigationTiming).domInteractive;
-                            this.DomCompleteMark = (entry as PerformanceNavigationTiming).domComplete;
+                            const navEntry = entry as PerformanceNavigationTiming;
+                            this.requestSentMark = navEntry.requestStart;
+                            this.responseReceivedMark = navEntry.responseStart;
+                            this.responseDownloadDuration = navEntry.responseEnd - navEntry.responseStart;
+                            this.responseCompleteMark = navEntry.responseEnd;
+                            this.domInteractiveMark = navEntry.domInteractive;
+                            this.domCompleteMark = navEntry.domComplete;
                             break;
                         case "resource":
-                            this.TotalResourceCount++;
-                            if ((entry as PerformanceResourceTiming).deliveryType === "cache") this.TotalResourceFromCacheCount++;
-                            this.TotalResourceDownloadTimeSpent += (entry as PerformanceResourceTiming).duration;
+                            const resourceEntry = entry as PerformanceResourceTiming;
+                            this.totalResourceCount++;
+                            if (resourceEntry.deliveryType === "cache") {
+                                this.totalResourceFromCacheCount++;
+                            }
+                            this.totalResourceDownloadTimeSpent += resourceEntry.duration;
+
+                            if (resourceEntry.renderBlockingStatus === "blocking") {
+                                this.hasBlockingResources = true;
+                            }
+
+                            this.recentResources = [resourceEntry, ...this.recentResources.slice(0, 9)];
                             break;
-                        default:
-                            console.log("entry", entry);
                     }
                 });
             });
+
             console.log("PerformanceObserver initialized", PerformanceObserver.supportedEntryTypes);
             performanceObserver.observe({
                 buffered: true,
@@ -111,7 +112,6 @@ export class ClientPagePerformanceTracker {
                 buffered: true,
                 type: "largest-contentful-paint"
             });
-
         }
     }
 }
@@ -123,5 +123,5 @@ export const initClientPagePerformanceTracker = () => {
 };
 
 export const getClientPagePerformanceTracker = () => {
-    return getContext<ReturnType<typeof initClientPagePerformanceTracker>>(SYMBOL);
+    return getContext<ClientPagePerformanceTracker>(SYMBOL);
 };

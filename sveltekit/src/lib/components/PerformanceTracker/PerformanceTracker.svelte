@@ -2,17 +2,17 @@
 	import { getClientPagePerformanceTracker } from '$lib/controllers/ClientPerformanceTracker.svelte';
 	import { fade, scale } from 'svelte/transition';
 	import MetricDisplay from './Components/MetricDisplay.svelte';
-
-	const clientPagePerformanceTracker = getClientPagePerformanceTracker();
+	import ResourceList from './Components/ResourceList.svelte';
+	const tracker = getClientPagePerformanceTracker();
 </script>
 
-{#if clientPagePerformanceTracker}
+{#if tracker}
 	<button
 		class={[
 			'scale-3d fixed bottom-2 left-2 rounded-md bg-indigo-300 p-1.5 shadow transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:shadow-md'
 		]}
 		onclick={() => {
-			clientPagePerformanceTracker.TogglePerformanceTracker();
+			tracker.togglePerformanceTracker();
 		}}
 		transition:fade
 		aria-label="Toggle Performance Tracker Window"
@@ -24,19 +24,10 @@
 			/>
 		</svg>
 	</button>
-
-	{#if clientPagePerformanceTracker.isOpen}
+	{#if tracker.isOpen}
 		<div
-			in:scale={{
-				start: 0.95,
-				opacity: 1,
-				duration: 150
-			}}
-			out:scale={{
-				start: 0.95,
-				opacity: 0,
-				duration: 150
-			}}
+			in:scale={{ start: 0.95, opacity: 1, duration: 150 }}
+			out:scale={{ start: 0.95, opacity: 0, duration: 150 }}
 			class={[
 				'fixed bottom-2 left-2 mb-10 rounded-md border border-indigo-300 bg-indigo-50 p-1.5',
 				'flex flex-col gap-2'
@@ -63,51 +54,43 @@
 			<div class="grid grid-cols-2 gap-4">
 				<div>
 					<h3 class="mb-2 font-semibold">Navigation metrics</h3>
-					<MetricDisplay
-						text={'Request sent	after'}
-						value={clientPagePerformanceTracker.RequestSentMark}
-						unit="ms"
-					/>
+					<MetricDisplay text={'Request sent after'} value={tracker.requestSentMark} unit="ms" />
 					<MetricDisplay
 						text={'Response received after'}
-						value={clientPagePerformanceTracker.ResponseReceivedMark}
+						value={tracker.responseReceivedMark}
 						unit="ms"
 					/>
 					<MetricDisplay
 						text={'Response Download took'}
-						value={clientPagePerformanceTracker.ResponseDownloadDuration}
+						value={tracker.responseDownloadDuration}
 						unit="ms"
 					/>
 					<MetricDisplay
 						text={'Response complete after'}
-						value={clientPagePerformanceTracker.ResponseCompleteMark}
+						value={tracker.responseCompleteMark}
 						unit="ms"
 					/>
 					<MetricDisplay
 						text={'Dom interactive after'}
-						value={clientPagePerformanceTracker.DomInteractiveMark}
+						value={tracker.domInteractiveMark}
 						unit="ms"
 					/>
-					<MetricDisplay
-						text={'Dom complete after'}
-						value={clientPagePerformanceTracker.DomCompleteMark}
-						unit="ms"
-					/>
+					<MetricDisplay text={'Dom complete after'} value={tracker.domCompleteMark} unit="ms" />
 				</div>
 				<div>
 					<h3 class="mb-2 font-semibold">Resource metrics</h3>
-					<MetricDisplay
-						text={'Total resources loaded'}
-						value={clientPagePerformanceTracker.TotalResourceCount}
-					/>
-					<MetricDisplay
-						text={'Resources from cache'}
-						value={clientPagePerformanceTracker.TotalResourceFromCacheCount}
-					/>
-					<MetricDisplay
-						text={'Total download time'}
-						value={clientPagePerformanceTracker.TotalResourceDownloadTimeSpent}
-						unit="ms"
+					<div class="mb-3 flex items-center gap-4">
+						<MetricDisplay text={'Resources'} value={tracker.totalResourceCount} />
+						<MetricDisplay
+							text={'Total time'}
+							value={tracker.totalResourceDownloadTimeSpent}
+							unit="ms"
+						/>
+					</div>
+					<ResourceList
+						resources={tracker.recentResources}
+						allFromCache={tracker.totalResourceCount === tracker.totalResourceFromCacheCount}
+						hasBlockingResources={tracker.hasBlockingResources}
 					/>
 				</div>
 			</div>
