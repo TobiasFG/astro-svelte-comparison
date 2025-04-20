@@ -3,12 +3,14 @@ import { beforeNavigate } from "$app/navigation";
 import { getContext, setContext } from "svelte";
 
 export class ClientPerformanceTracker {
-    isOpen = $state(false);
-    isLoading = $state(true);
     requestSentMark = $state<number | null>(null);
     responseReceivedMark = $state<number | null>(null);
-    responseDownloadDuration = $state<number | null>(null);
+    responseDelayedDuration = $state<number | null>(null);
     responseCompleteMark = $state<number | null>(null);
+    responseDownloadDuration = $state<number | null>(null);
+    firstPaintMark = $state<number | null>(null);
+    firstContentfulPaintMark = $state<number | null>(null);
+    largestContentfulPaintMark = $state<number | null>(null);
     domInteractiveMark = $state<number | null>(null);
     domCompleteMark = $state<number | null>(null);
     totalResourceCount = $state(0);
@@ -24,11 +26,15 @@ export class ClientPerformanceTracker {
         }
 
         beforeNavigate((navigation) => {
-            this.isLoading = true;
+            console.log("beforeNavigate", navigation);
             this.requestSentMark = null;
             this.responseReceivedMark = null;
-            this.responseDownloadDuration = null;
+            this.responseDelayedDuration = null;
             this.responseCompleteMark = null;
+            this.responseDownloadDuration = null;
+            this.firstPaintMark = null;
+            this.firstContentfulPaintMark = null;
+            this.largestContentfulPaintMark = null;
             this.domInteractiveMark = null;
             this.domCompleteMark = null;
             this.totalResourceCount = 0;
@@ -39,27 +45,25 @@ export class ClientPerformanceTracker {
         });
     }
 
-    togglePerformanceTracker() {
-        this.isOpen = !this.isOpen;
-    }
-
     private initializePerformanceTracking() {
         if (typeof window !== "undefined" && "PerformanceObserver" in window) {
             const performanceObserver = new PerformanceObserver((metrics) => {
                 metrics.getEntries().forEach((entry) => {
-                    console.log("PerformanceObserver entry", entry);
                     switch (entry.entryType) {
                         case "navigation":
+                            console.log("PerformanceObserver entry", entry);
                             const navEntry = entry as PerformanceNavigationTiming;
                             this.requestSentMark = navEntry.requestStart;
                             this.responseReceivedMark = navEntry.responseStart;
-                            this.responseDownloadDuration = navEntry.responseEnd - navEntry.responseStart;
+                            this.responseDelayedDuration = navEntry.responseStart - navEntry.requestStart;
                             this.responseCompleteMark = navEntry.responseEnd;
+                            this.responseDownloadDuration = navEntry.responseEnd - navEntry.responseStart;
                             this.domInteractiveMark = navEntry.domInteractive;
                             this.domCompleteMark = navEntry.domComplete;
                             break;
                         case "resource":
                             const resourceEntry = entry as PerformanceResourceTiming;
+                            if (resourceEntry.duration < 0.1) break;
                             this.totalResourceCount++;
                             if (resourceEntry.deliveryType === "cache") {
                                 this.totalResourceFromCacheCount++;
@@ -70,8 +74,25 @@ export class ClientPerformanceTracker {
                                 this.hasBlockingResources = true;
                             }
 
-                            this.recentResources = [resourceEntry, ...this.recentResources.slice(0, 9)];
+                            this.recentResources = [resourceEntry, ...this.recentResources];
                             break;
+                        case "paint":
+                            if (entry.name === "first-paint") {
+                                this.firstPaintMark = entry.startTime + entry.duration;
+                            }
+                            if (entry.name === "first-contentful-paint") {
+                                this.firstContentfulPaintMark = entry.startTime + entry.duration;
+                            }
+                            if (entry.name === "largest-contentful-paint") {
+                                this.largestContentfulPaintMark = entry.startTime + entry.duration;
+                            }
+                            break;
+                        case "largest-contentful-paint":
+                            this.largestContentfulPaintMark = entry.startTime + entry.duration;
+                            break;
+
+                        default:
+                            console.log("PerformanceObserver entry", entry);
                     }
                 });
             });
@@ -89,10 +110,10 @@ export class ClientPerformanceTracker {
                 buffered: true,
                 type: "largest-contentful-paint"
             });
-            performanceObserver.observe({
-                buffered: true,
-                type: "layout-shift"
-            });
+            // performanceObserver.observe({
+            //     buffered: true,
+            //     type: "layout-shift"
+            // });
             performanceObserver.observe({
                 buffered: true,
                 type: "long-animation-frame"
@@ -120,10 +141,6 @@ export class ClientPerformanceTracker {
             performanceObserver.observe({
                 buffered: true,
                 type: "resource"
-            });
-            performanceObserver.observe({
-                buffered: true,
-                type: "first-contentful-paint"
             });
             performanceObserver.observe({
                 buffered: true,

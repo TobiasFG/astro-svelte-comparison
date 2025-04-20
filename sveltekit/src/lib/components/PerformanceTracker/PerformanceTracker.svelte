@@ -50,6 +50,17 @@
 						value={tracker.responseCompleteMark}
 						unit="ms"
 					/>
+					<MetricDisplay text={'Page load after'} value={tracker.firstPaintMark} unit="ms" />
+					<MetricDisplay
+						text={'Page interactive after'}
+						value={tracker.firstContentfulPaintMark}
+						unit="ms"
+					/>
+					<MetricDisplay
+						text={'First contentful paint after'}
+						value={tracker.largestContentfulPaintMark}
+						unit="ms"
+					/>
 					<MetricDisplay
 						text={'Dom interactive after'}
 						value={tracker.domInteractiveMark}
