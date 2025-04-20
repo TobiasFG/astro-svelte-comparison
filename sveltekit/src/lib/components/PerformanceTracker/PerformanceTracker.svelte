@@ -39,27 +39,31 @@
 						text={'Response received after'}
 						value={tracker.responseReceivedMark}
 						unit="ms"
-					/>
-					<MetricDisplay
-						text={'Response Download took'}
-						value={tracker.responseDownloadDuration}
-						unit="ms"
+						duration={tracker.responseDelayDuration}
 					/>
 					<MetricDisplay
 						text={'Response complete after'}
 						value={tracker.responseCompleteMark}
 						unit="ms"
+						duration={tracker.responseDownloadDuration}
 					/>
-					<MetricDisplay text={'Page load after'} value={tracker.firstPaintMark} unit="ms" />
+					<MetricDisplay
+						text={'Page load after'}
+						value={tracker.firstPaintMark}
+						unit="ms"
+						duration={tracker.firstPaintDuration}
+					/>
 					<MetricDisplay
 						text={'Page interactive after'}
 						value={tracker.firstContentfulPaintMark}
 						unit="ms"
+						duration={tracker.firstContentfulPaintDuration}
 					/>
 					<MetricDisplay
-						text={'First contentful paint after'}
+						text={'Largest contentful paint after'}
 						value={tracker.largestContentfulPaintMark}
 						unit="ms"
+						duration={tracker.largestContentfulPaintDuration}
 					/>
 					<MetricDisplay
 						text={'Dom interactive after'}

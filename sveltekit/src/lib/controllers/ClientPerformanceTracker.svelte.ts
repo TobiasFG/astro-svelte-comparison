@@ -5,12 +5,15 @@ import { getContext, setContext } from "svelte";
 export class ClientPerformanceTracker {
     requestSentMark = $state<number | null>(null);
     responseReceivedMark = $state<number | null>(null);
-    responseDelayedDuration = $state<number | null>(null);
+    responseDelayDuration = $state<number | null>(null);
     responseCompleteMark = $state<number | null>(null);
     responseDownloadDuration = $state<number | null>(null);
     firstPaintMark = $state<number | null>(null);
+    firstPaintDuration = $state<number | null>(null);
     firstContentfulPaintMark = $state<number | null>(null);
+    firstContentfulPaintDuration = $state<number | null>(null);
     largestContentfulPaintMark = $state<number | null>(null);
+    largestContentfulPaintDuration = $state<number | null>(null);
     domInteractiveMark = $state<number | null>(null);
     domCompleteMark = $state<number | null>(null);
     totalResourceCount = $state(0);
@@ -29,7 +32,7 @@ export class ClientPerformanceTracker {
             console.log("beforeNavigate", navigation);
             this.requestSentMark = null;
             this.responseReceivedMark = null;
-            this.responseDelayedDuration = null;
+            this.responseDelayDuration = null;
             this.responseCompleteMark = null;
             this.responseDownloadDuration = null;
             this.firstPaintMark = null;
@@ -55,7 +58,7 @@ export class ClientPerformanceTracker {
                             const navEntry = entry as PerformanceNavigationTiming;
                             this.requestSentMark = navEntry.requestStart;
                             this.responseReceivedMark = navEntry.responseStart;
-                            this.responseDelayedDuration = navEntry.responseStart - navEntry.requestStart;
+                            this.responseDelayDuration = navEntry.responseStart - navEntry.requestStart;
                             this.responseCompleteMark = navEntry.responseEnd;
                             this.responseDownloadDuration = navEntry.responseEnd - navEntry.responseStart;
                             this.domInteractiveMark = navEntry.domInteractive;
@@ -78,19 +81,18 @@ export class ClientPerformanceTracker {
                             break;
                         case "paint":
                             if (entry.name === "first-paint") {
-                                this.firstPaintMark = entry.startTime + entry.duration;
+                                this.firstPaintMark = entry.startTime;
+                                this.firstPaintDuration = entry.duration;
                             }
                             if (entry.name === "first-contentful-paint") {
-                                this.firstContentfulPaintMark = entry.startTime + entry.duration;
-                            }
-                            if (entry.name === "largest-contentful-paint") {
-                                this.largestContentfulPaintMark = entry.startTime + entry.duration;
+                                this.firstContentfulPaintMark = entry.startTime;
+                                this.firstContentfulPaintDuration = entry.duration;
                             }
                             break;
                         case "largest-contentful-paint":
-                            this.largestContentfulPaintMark = entry.startTime + entry.duration;
+                            this.largestContentfulPaintMark = entry.startTime;
+                            this.largestContentfulPaintDuration = entry.duration;
                             break;
-
                         default:
                             console.log("PerformanceObserver entry", entry);
                     }
