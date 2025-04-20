@@ -1,9 +1,8 @@
 <script lang="ts">
 	import PerformanceTracker from '$lib/components/PerformanceTracker/PerformanceTracker.svelte';
-	import type { PageData } from './$types';
+	import type { PageProps } from './$types';
 
-	const { data } = $props<{ data: PageData }>();
-
+	let { data }: PageProps = $props();
 	// Use our performance tracking hook with the new class-based implementation
 </script>
 

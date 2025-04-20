@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
         // Return data for the page, including detailed metrics
         return {
-            data: await response.json() as RandomData,
+            random: await response.json() as RandomData,
             error: null
         };
     } catch (err) {
