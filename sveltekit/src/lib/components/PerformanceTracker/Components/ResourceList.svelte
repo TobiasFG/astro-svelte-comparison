@@ -28,7 +28,9 @@
 			{#each resources as resource}
 				<div class="rounded bg-white/50 p-1 font-mono text-xs">
 					<div class="flex justify-between">
-						<span class="truncate">{resource.name}</span>
+						<span class="truncate">
+							{resource.name.split('/').slice(-1)[0].replace(/\?.*$/, '')}
+						</span>
 						<span>{resource.duration.toFixed(1)}ms</span>
 					</div>
 				</div>

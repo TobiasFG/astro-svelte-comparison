@@ -1,7 +1,8 @@
 import { browser } from "$app/environment";
+import { beforeNavigate } from "$app/navigation";
 import { getContext, setContext } from "svelte";
 
-export class ClientPagePerformanceTracker {
+export class ClientPerformanceTracker {
     isOpen = $state(false);
     isLoading = $state(true);
     requestSentMark = $state<number | null>(null);
@@ -21,6 +22,21 @@ export class ClientPagePerformanceTracker {
         if (browser) {
             this.initializePerformanceTracking();
         }
+
+        beforeNavigate((navigation) => {
+            this.isLoading = true;
+            this.requestSentMark = null;
+            this.responseReceivedMark = null;
+            this.responseDownloadDuration = null;
+            this.responseCompleteMark = null;
+            this.domInteractiveMark = null;
+            this.domCompleteMark = null;
+            this.totalResourceCount = 0;
+            this.totalResourceFromCacheCount = 0;
+            this.totalResourceDownloadTimeSpent = 0;
+            this.hasBlockingResources = false;
+            this.recentResources = [];
+        });
     }
 
     togglePerformanceTracker() {
@@ -31,6 +47,7 @@ export class ClientPagePerformanceTracker {
         if (typeof window !== "undefined" && "PerformanceObserver" in window) {
             const performanceObserver = new PerformanceObserver((metrics) => {
                 metrics.getEntries().forEach((entry) => {
+                    console.log("PerformanceObserver entry", entry);
                     switch (entry.entryType) {
                         case "navigation":
                             const navEntry = entry as PerformanceNavigationTiming;
@@ -119,9 +136,9 @@ export class ClientPagePerformanceTracker {
 const SYMBOL = Symbol('ClientPagePerformanceTracker');
 
 export const initClientPagePerformanceTracker = () => {
-    return setContext(SYMBOL, new ClientPagePerformanceTracker());
+    return setContext(SYMBOL, new ClientPerformanceTracker());
 };
 
 export const getClientPagePerformanceTracker = () => {
-    return getContext<ClientPagePerformanceTracker>(SYMBOL);
+    return getContext<ClientPerformanceTracker>(SYMBOL);
 };

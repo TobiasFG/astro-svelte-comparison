@@ -27,5 +27,4 @@
 	</main>
 </div>
 
-<ClientPagePerformanceTracker />
 <NotificationCenter />
