@@ -83,11 +83,7 @@
 						unit="ms"
 					/>
 				</div>
-				<ResourceList
-					resources={tracker.recentResources}
-					allFromCache={tracker.totalResourceCount === tracker.totalResourceFromCacheCount}
-					hasBlockingResources={tracker.hasBlockingResources}
-				/>
+				<ResourceList resources={tracker.recentResources} />
 			</div>
 		</div>
 	</div>
