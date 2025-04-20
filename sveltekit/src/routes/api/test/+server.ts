@@ -1,4 +1,4 @@
-import { error, json, type RequestHandler } from '@sveltejs/kit';
+import { type RequestHandler } from '@sveltejs/kit';
 
 export type RandomData = {
     id: string;

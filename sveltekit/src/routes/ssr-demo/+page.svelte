@@ -1,8 +1,8 @@
 <script lang="ts">
 	import PerformanceTracker from '$lib/components/PerformanceTracker/PerformanceTracker.svelte';
-	import type { PageProps } from './$types';
+	import type { PageData } from './$types';
 
-	const { data }: PageProps = $props();
+	const { data } = $props<{ data: PageData }>();
 
 	// Use our performance tracking hook with the new class-based implementation
 </script>
@@ -76,7 +76,7 @@
 						This error occurred on the server during page rendering. Try refreshing the page.
 					</p>
 				</div>
-			{:else if data?.random}
+			{:else if data.random}
 				<div class="space-y-6">
 					<div class="rounded-md bg-gray-50 p-6 shadow-sm">
 						<h3 class="mb-4 text-lg font-medium text-gray-800">Random Data:</h3>
