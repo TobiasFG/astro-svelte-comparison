@@ -1,10 +1,5 @@
 <script lang="ts">
-	let { text, value, unit, duration } = $props<{
-		text: string;
-		value: number | null;
-		unit?: string;
-		duration?: number | null;
-	}>();
+	let { text, value, unit, duration } = $props();
 </script>
 
 <div class="flex items-center justify-between gap-4">

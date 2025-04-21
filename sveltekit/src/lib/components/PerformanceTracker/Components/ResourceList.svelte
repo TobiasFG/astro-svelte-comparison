@@ -1,9 +1,5 @@
 <script lang="ts">
-	interface Props {
-		resources?: PerformanceResourceTiming[];
-	}
-
-	let { resources = [] }: Props = $props();
+	let { resources = [] } = $props();
 </script>
 
 <div class="flex flex-col gap-2">
