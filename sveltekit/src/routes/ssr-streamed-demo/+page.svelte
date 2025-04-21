@@ -216,7 +216,7 @@
 			<PerformanceTracker />
 		</div>
 
-		<div class="space-y-4 rounded-lg border bg-gray-50 p-6">
+		<div class="mb-8 rounded-lg bg-white p-6 shadow-lg">
 			<h2 class="text-xl font-semibold">About SSR with Streaming</h2>
 
 			<div>
