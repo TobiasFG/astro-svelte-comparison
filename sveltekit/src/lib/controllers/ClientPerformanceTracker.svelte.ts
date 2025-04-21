@@ -79,20 +79,6 @@ export class ClientPerformanceTracker {
 
                             this.recentResources = [resourceEntry, ...this.recentResources];
                             break;
-                        case "paint":
-                            if (entry.name === "first-paint") {
-                                this.firstPaintMark = entry.startTime;
-                                this.firstPaintDuration = entry.duration;
-                            }
-                            if (entry.name === "first-contentful-paint") {
-                                this.firstContentfulPaintMark = entry.startTime;
-                                this.firstContentfulPaintDuration = entry.duration;
-                            }
-                            break;
-                        case "largest-contentful-paint":
-                            this.largestContentfulPaintMark = entry.startTime;
-                            this.largestContentfulPaintDuration = entry.duration;
-                            break;
                         default:
                             console.log("PerformanceObserver entry", entry);
                     }
@@ -136,18 +122,18 @@ export class ClientPerformanceTracker {
                 buffered: true,
                 type: "navigation"
             });
-            performanceObserver.observe({
-                buffered: true,
-                type: "paint"
-            });
+            // performanceObserver.observe({
+            //     buffered: true,
+            //     type: "paint"
+            // });
             performanceObserver.observe({
                 buffered: true,
                 type: "resource"
             });
-            performanceObserver.observe({
-                buffered: true,
-                type: "largest-contentful-paint"
-            });
+            // performanceObserver.observe({
+            //     buffered: true,
+            //     type: "largest-contentful-paint"
+            // });
         }
     }
 }

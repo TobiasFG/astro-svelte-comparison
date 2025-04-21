@@ -10,40 +10,34 @@
 	let timelineMetrics = $derived(
 		tracker
 			? [
+					// Network Phase
 					{
 						name: 'Request Sent',
 						startTime: tracker.requestSentMark || 0,
-						color: '#3B82F6'
+						color: '#3B82F6' // blue
 					},
 					{
 						name: 'Response Delay',
 						startTime: tracker.requestSentMark || 0,
 						duration: tracker.responseDelayDuration,
-						color: '#EF4444'
+						color: '#EF4444' // red
 					},
 					{
 						name: 'Response Download',
 						startTime: tracker.responseReceivedMark || 0,
 						duration: tracker.responseDownloadDuration,
-						color: '#10B981'
+						color: '#10B981' // green
+					},
+					// Rendering Phase
+					{
+						name: 'DOM Interactive',
+						startTime: tracker.domInteractiveMark || 0,
+						color: '#6366F1' // indigo
 					},
 					{
-						name: 'First Paint',
-						startTime: tracker.firstPaintMark || 0,
-						duration: tracker.firstPaintDuration,
-						color: '#8B5CF6'
-					},
-					{
-						name: 'First Contentful Paint',
-						startTime: tracker.firstContentfulPaintMark || 0,
-						duration: tracker.firstContentfulPaintDuration,
-						color: '#F59E0B'
-					},
-					{
-						name: 'Largest Contentful Paint',
-						startTime: tracker.largestContentfulPaintMark || 0,
-						duration: tracker.largestContentfulPaintDuration,
-						color: '#6366F1'
+						name: 'DOM Complete',
+						startTime: tracker.domCompleteMark || 0,
+						color: '#14B8A6' // teal
 					}
 				].filter((metric) => metric.startTime > 0)
 			: []
@@ -111,24 +105,6 @@
 						value={tracker.responseCompleteMark}
 						unit="ms"
 						duration={tracker.responseDownloadDuration}
-					/>
-					<MetricDisplay
-						text={'Page load after'}
-						value={tracker.firstPaintMark}
-						unit="ms"
-						duration={tracker.firstPaintDuration}
-					/>
-					<MetricDisplay
-						text={'Page interactive after'}
-						value={tracker.firstContentfulPaintMark}
-						unit="ms"
-						duration={tracker.firstContentfulPaintDuration}
-					/>
-					<MetricDisplay
-						text={'Largest contentful paint after'}
-						value={tracker.largestContentfulPaintMark}
-						unit="ms"
-						duration={tracker.largestContentfulPaintDuration}
 					/>
 					<MetricDisplay
 						text={'Dom interactive after'}
