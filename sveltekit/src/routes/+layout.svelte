@@ -3,13 +3,15 @@
 	import NavBar from '$lib/components/NavBar/NavBar.svelte';
 	import NotificationCenter from '$lib/components/NotificationApp/NotificationCenter.svelte';
 	import { initNotificationStore } from '$lib/stores/notification-store.svelte';
-	import { initPerformanceTracker } from '$lib/controllers/PerformanceTracker.svelte';
+	import { initPerformanceStore } from '$lib/stores/performance-store.svelte';
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	initNotificationStore();
-	initPerformanceTracker();
+	// Remove old tracker
+	// initPerformanceTracker();
+	initPerformanceStore();
 </script>
 
 <svelte:head>

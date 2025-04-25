@@ -1,303 +1,179 @@
 <script lang="ts">
-	import { getPerformanceTracker } from '$lib/controllers/PerformanceTracker.svelte';
-	import { fade, scale } from 'svelte/transition';
+	import type { PageLoadMetric, SpaNavigationMetric } from '$lib/stores/performance-store.svelte';
 	import MetricDisplay from './Components/MetricDisplay.svelte';
-	import ResourceList from './Components/ResourceList.svelte';
 	import Timeline from './Components/Timeline.svelte';
 
-	const tracker = getPerformanceTracker();
+	const { metric } = $props<{ metric: PageLoadMetric | SpaNavigationMetric }>();
 
-	let timelineMetrics = $derived(
-		tracker
-			? [
-					// Network Phase
-					{
-						name: 'Redirect',
-						startTime: tracker.redirect.start ?? 0,
-						duration: tracker.redirect.duration,
-						color: '#6366F1'
-					},
-					{
-						name: 'Service Worker',
-						startTime: tracker.worker.start ?? 0,
-						duration: tracker.worker.duration,
-						color: '#A21CAF'
-					},
-					{
-						name: 'Fetch',
-						startTime: tracker.fetch.start ?? 0,
-						duration: tracker.fetch.duration,
-						color: '#2563EB'
-					},
-					{
-						name: 'DNS',
-						startTime: tracker.dns.start ?? 0,
-						duration: tracker.dns.duration,
-						color: '#F59E42'
-					},
-					{
-						name: 'TCP',
-						startTime: tracker.tcp.start ?? 0,
-						duration: tracker.tcp.duration,
-						color: '#F59E0B'
-					},
-					{
-						name: 'TLS',
-						startTime: tracker.tls.start ?? 0,
-						duration: tracker.tls.duration,
-						color: '#10B981'
-					},
-					// SPA Navigation (soft tracking) or Request
-					tracker.request.start != null && tracker.response.end != null
-						? {
-								name: 'Request',
-								startTime: tracker.request.start,
-								duration: tracker.request.duration,
-								color: '#EF4444'
-							}
-						: tracker.spaNavigation.start != null && tracker.spaNavigation.duration != null
-							? {
-									name: 'SPA Navigation',
-									startTime: tracker.spaNavigation.start,
-									duration: tracker.spaNavigation.duration,
-									color: '#F59E42'
-								}
-							: undefined,
-					{
-						name: 'Response',
-						startTime: tracker.response.start ?? 0,
-						duration: tracker.response.duration,
-						color: '#10B981'
-					},
-					{
-						name: 'Unload Event',
-						startTime: tracker.unloadEvent.start ?? 0,
-						duration: tracker.unloadEvent.duration,
-						color: '#F87171'
-					},
-					{
-						name: 'DOM Content Loaded',
-						startTime: tracker.domContentLoaded.start ?? 0,
-						duration: tracker.domContentLoaded.duration,
-						color: '#F472B6'
-					},
-					{
-						name: 'DOM Interactive',
-						startTime: tracker.domInteractive.start ?? 0,
-						duration: tracker.domInteractive.duration,
-						color: '#6366F1'
-					},
-					{
-						name: 'DOM Complete',
-						startTime: tracker.domComplete.start ?? 0,
-						duration: tracker.domComplete.duration,
-						color: '#14B8A6'
-					},
-					{
-						name: 'Load Event',
-						startTime: tracker.loadEvent.start ?? 0,
-						duration: tracker.loadEvent.duration,
-						color: '#FBBF24'
-					},
-					// Paint Phase
-					{
-						name: 'First Paint',
-						startTime: tracker.firstPaint.start ?? 0,
-						duration: tracker.firstPaint.duration,
-						color: '#F59E0B'
-					},
-					{
-						name: 'First Contentful Paint',
-						startTime: tracker.firstContentfulPaint.start ?? 0,
-						duration: tracker.firstContentfulPaint.duration,
-						color: '#D97706'
-					},
-					{
-						name: 'Largest Contentful Paint',
-						startTime: tracker.largestContentfulPaint.start ?? 0,
-						duration: tracker.largestContentfulPaint.duration,
-						color: '#B45309'
-					},
-					// Svelte Hydration
-					{
-						name: 'Svelte Hydration',
-						startTime: tracker.svelteHydration.start ?? 0,
-						duration: tracker.svelteHydration.duration,
-						color: '#6366F1'
-					}
-				].filter((metric): metric is Exclude<typeof metric, undefined> => {
-					if (!metric) return false;
-					return metric.duration != null && metric.startTime != null && metric.startTime >= 0;
-				})
-			: []
-	);
+	function getTimelineMetrics(metric: PageLoadMetric | SpaNavigationMetric) {
+		if (metric.type === 'page-load') {
+			const nav = metric.metrics;
+			return [
+				{
+					name: 'Redirect',
+					startTime: nav.redirectStart - nav.startTime,
+					duration: nav.redirectEnd - nav.redirectStart,
+					color: '#6366F1'
+				},
+				{
+					name: 'DNS',
+					startTime: nav.domainLookupStart - nav.startTime,
+					duration: nav.domainLookupEnd - nav.domainLookupStart,
+					color: '#F59E42'
+				},
+				{
+					name: 'TCP',
+					startTime: nav.connectStart - nav.startTime,
+					duration: nav.connectEnd - nav.connectStart,
+					color: '#F59E0B'
+				},
+				{
+					name: 'Request',
+					startTime: nav.requestStart - nav.startTime,
+					duration: nav.responseStart - nav.requestStart,
+					color: '#EF4444'
+				},
+				{
+					name: 'Response',
+					startTime: nav.responseStart - nav.startTime,
+					duration: nav.responseEnd - nav.responseStart,
+					color: '#10B981'
+				},
+				{
+					name: 'DOM Content Loaded',
+					startTime: nav.domContentLoadedEventStart - nav.startTime,
+					duration: nav.domContentLoadedEventEnd - nav.domContentLoadedEventStart,
+					color: '#F472B6'
+				},
+				{
+					name: 'Load Event',
+					startTime: nav.loadEventStart - nav.startTime,
+					duration: nav.loadEventEnd - nav.loadEventStart,
+					color: '#FBBF24'
+				},
+				{
+					name: 'First Paint',
+					startTime: metric.paints['first-paint'] ?? 0,
+					duration: 0.5,
+					color: '#F59E0B'
+				},
+				{
+					name: 'First Contentful Paint',
+					startTime: metric.paints['first-contentful-paint'] ?? 0,
+					duration: 0.5,
+					color: '#D97706'
+				}
+			];
+		} else {
+			return [
+				{
+					name: 'SPA Navigation',
+					startTime: metric.start,
+					duration: metric.duration,
+					color: '#3B82F6'
+				}
+			];
+		}
+	}
 
-	$effect(() => {
-		console.log('timelineMetrics for chart:', timelineMetrics);
-	});
-
-	let maxTime = $derived(
-		tracker
-			? Math.max(
-					...timelineMetrics.map((m) => m.startTime + (m.duration || 0)),
-					tracker.largestContentfulPaint.end ?? 0,
-					tracker.domComplete.end ?? 0,
-					tracker.loadEvent.end ?? 0
-				) * 1.1
+	const timelineMetrics = $derived(() => getTimelineMetrics(metric));
+	const maxTime = $derived(() =>
+		timelineMetrics.length > 0
+			? Math.max(...timelineMetrics.map((m) => m.startTime + (m.duration || 0))) * 1.1
 			: 0
 	);
 </script>
 
-{#if tracker}
-	<div
-		in:scale={{ start: 0.95, opacity: 1, duration: 150 }}
-		out:scale={{ start: 0.95, opacity: 0, duration: 150 }}
-		class="mt-8 rounded-lg"
-	>
-		<div class="mb-6 flex items-center gap-2">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-5 w-5 text-blue-500"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				aria-hidden="true"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 10V3L4 14h7v7l9-11h-7z"
-				/>
-			</svg>
-			<h2 class="text-xl font-semibold text-gray-800">Performance Metrics</h2>
-		</div>
-
+<div class="mt-4">
+	{#if timelineMetrics.length > 0}
 		<Timeline metrics={timelineMetrics} {maxTime} />
+	{:else}
+		<p class="mb-4 text-sm text-gray-500">No timeline data available for this metric.</p>
+	{/if}
 
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-			<div class="rounded-lg bg-gray-50 p-4 shadow-sm">
-				<h3 class="mb-4 text-lg font-medium text-gray-800">Navigation Metrics</h3>
-				<div class="space-y-2">
-					<MetricDisplay
-						text={'Redirect'}
-						value={tracker.redirect.start}
-						unit="ms"
-						duration={tracker.redirect.duration}
-					/>
-					<MetricDisplay
-						text={'Service Worker'}
-						value={tracker.worker.start}
-						unit="ms"
-						duration={tracker.worker.duration}
-					/>
-					<MetricDisplay
-						text={'Fetch'}
-						value={tracker.fetch.start}
-						unit="ms"
-						duration={tracker.fetch.duration}
-					/>
-					<MetricDisplay
-						text={'DNS'}
-						value={tracker.dns.start}
-						unit="ms"
-						duration={tracker.dns.duration}
-					/>
-					<MetricDisplay
-						text={'TCP'}
-						value={tracker.tcp.start}
-						unit="ms"
-						duration={tracker.tcp.duration}
-					/>
-					<MetricDisplay
-						text={'TLS'}
-						value={tracker.tls.start}
-						unit="ms"
-						duration={tracker.tls.duration}
-					/>
-					<MetricDisplay
-						text={'Request'}
-						value={tracker.request.start}
-						unit="ms"
-						duration={tracker.request.duration}
-					/>
-					<MetricDisplay
-						text={'Response'}
-						value={tracker.response.start}
-						unit="ms"
-						duration={tracker.response.duration}
-					/>
-					<MetricDisplay
-						text={'DOM Content Loaded'}
-						value={tracker.domContentLoaded.start}
-						unit="ms"
-						duration={tracker.domContentLoaded.duration}
-					/>
-					<MetricDisplay
-						text={'DOM Interactive'}
-						value={tracker.domInteractive.start}
-						unit="ms"
-						duration={tracker.domInteractive.duration}
-					/>
-					<MetricDisplay
-						text={'DOM Complete'}
-						value={tracker.domComplete.start}
-						unit="ms"
-						duration={tracker.domComplete.duration}
-					/>
-					<MetricDisplay
-						text={'Unload Event'}
-						value={tracker.unloadEvent.start}
-						unit="ms"
-						duration={tracker.unloadEvent.duration}
-					/>
-					<MetricDisplay
-						text={'Load Event'}
-						value={tracker.loadEvent.start}
-						unit="ms"
-						duration={tracker.loadEvent.duration}
-					/>
-				</div>
-			</div>
-			<div class="rounded-lg bg-gray-50 p-4 shadow-sm">
-				<h3 class="mb-4 text-lg font-medium text-gray-800">Paint Metrics</h3>
-				<div class="space-y-2">
-					<MetricDisplay
-						text={'First Paint'}
-						value={tracker.firstPaint.start}
-						unit="ms"
-						duration={tracker.firstPaint.duration}
-					/>
-					<MetricDisplay
-						text={'First Contentful Paint'}
-						value={tracker.firstContentfulPaint.start}
-						unit="ms"
-						duration={tracker.firstContentfulPaint.duration}
-					/>
-					<MetricDisplay
-						text={'Largest Contentful Paint'}
-						value={tracker.largestContentfulPaint.start}
-						unit="ms"
-						duration={tracker.largestContentfulPaint.duration}
-					/>
-				</div>
-			</div>
-			<div class="rounded-lg bg-gray-50 p-4 shadow-sm">
-				<h3 class="mb-4 text-lg font-medium text-gray-800">Resource Metrics</h3>
+	{#if metric.type === 'page-load'}
+		<section aria-labelledby="nav-metrics" class="mt-4">
+			<h4 id="nav-metrics" class="mb-2 text-base font-semibold">Navigation Metrics</h4>
+			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 				<MetricDisplay
-					text={'Resources'}
-					value={tracker.totalResourceCount}
-					unit=""
-					duration={null}
+					text="Redirect"
+					value={metric.metrics.redirectStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.redirectEnd - metric.metrics.redirectStart}
 				/>
 				<MetricDisplay
-					text={'Total time'}
-					value={tracker.totalResourceDownloadTimeSpent}
+					text="DNS"
+					value={metric.metrics.domainLookupStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.domainLookupEnd - metric.metrics.domainLookupStart}
+				/>
+				<MetricDisplay
+					text="TCP"
+					value={metric.metrics.connectStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.connectEnd - metric.metrics.connectStart}
+				/>
+				<MetricDisplay
+					text="Request"
+					value={metric.metrics.requestStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.responseStart - metric.metrics.requestStart}
+				/>
+				<MetricDisplay
+					text="Response"
+					value={metric.metrics.responseStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.responseEnd - metric.metrics.responseStart}
+				/>
+				<MetricDisplay
+					text="DOM Content Loaded"
+					value={metric.metrics.domContentLoadedEventStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.domContentLoadedEventEnd -
+						metric.metrics.domContentLoadedEventStart}
+				/>
+				<MetricDisplay
+					text="Load Event"
+					value={metric.metrics.loadEventStart - metric.metrics.startTime}
+					unit="ms"
+					duration={metric.metrics.loadEventEnd - metric.metrics.loadEventStart}
+				/>
+			</div>
+		</section>
+		<section aria-labelledby="paint-metrics" class="mt-6">
+			<h4 id="paint-metrics" class="mb-2 text-base font-semibold">Paint Metrics</h4>
+			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				<MetricDisplay
+					text="First Paint"
+					value={typeof metric.paints['first-paint'] === 'number'
+						? metric.paints['first-paint']
+						: null}
 					unit="ms"
 					duration={null}
 				/>
-				<ResourceList resources={tracker.recentResources} />
+				<MetricDisplay
+					text="First Contentful Paint"
+					value={typeof metric.paints['first-contentful-paint'] === 'number'
+						? metric.paints['first-contentful-paint']
+						: null}
+					unit="ms"
+					duration={null}
+				/>
 			</div>
-		</div>
-	</div>
-{/if}
+		</section>
+	{:else}
+		<section aria-labelledby="spa-metrics" class="mt-4">
+			<h4 id="spa-metrics" class="mb-2 text-base font-semibold">SPA Navigation</h4>
+			<div class="grid gap-4 md:grid-cols-2">
+				<MetricDisplay
+					text="SPA Navigation Duration"
+					value={metric.duration}
+					unit="ms"
+					duration={null}
+				/>
+				<MetricDisplay text="Start Time" value={metric.start} unit="ms" duration={null} />
+				<MetricDisplay text="End Time" value={metric.end} unit="ms" duration={null} />
+			</div>
+		</section>
+	{/if}
+</div>

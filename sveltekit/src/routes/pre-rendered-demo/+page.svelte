@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PerformanceTracker from '$lib/components/PerformanceTracker/PerformanceTracker.svelte';
+	import PerformanceOverview from '$lib/components/PerformanceTracker/PerformanceOverview.svelte';
 	import type { RandomData } from '../api/test/+server';
 
 	// Use Svelte 5 runes for page data
@@ -48,7 +48,7 @@
 				<h2 class="text-xl font-semibold">Demo</h2>
 				<a
 					href="/pre-rendered-demo"
-					class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+					class="rounded-md bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
 				>
 					Reload Page
 				</a>
@@ -127,7 +127,7 @@
 						</div>
 					</div>
 
-					<PerformanceTracker />
+					<PerformanceOverview />
 				</div>
 			{/if}
 		</div>

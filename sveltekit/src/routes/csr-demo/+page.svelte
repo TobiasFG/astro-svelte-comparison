@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { RandomData } from '../api/test/+server';
-	import PerformanceTracker from '$lib/components/PerformanceTracker/PerformanceTracker.svelte';
+	import PerformanceOverview from '$lib/components/PerformanceTracker/PerformanceOverview.svelte';
 
 	let refreshCount = $state(0);
 
@@ -137,7 +137,7 @@
 						</span>
 					{/if}
 					<button
-						class="rounded-md bg-blue-500 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+						class="rounded-md bg-blue-500 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
 						onclick={fetchData}
 						disabled={loading}
 						aria-busy={loading}
@@ -146,7 +146,7 @@
 						<span class="flex items-center gap-2">
 							{#if loading}
 								<svg
-									class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+									class="mr-2 -ml-1 h-4 w-4 animate-spin text-white"
 									xmlns="http://www.w3.org/2000/svg"
 									fill="none"
 									viewBox="0 0 24 24"
@@ -222,7 +222,7 @@
 								</p>
 							{/if}
 							<button
-								class="rounded text-sm text-red-700 underline hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+								class="rounded text-sm text-red-700 underline hover:text-red-900 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
 								onclick={fetchData}
 							>
 								Try again
@@ -236,7 +236,7 @@
 							<div class="grid gap-4 md:grid-cols-2">
 								<div>
 									<p class="mb-1 text-sm text-gray-500">ID</p>
-									<p class="break-all rounded bg-gray-100 p-2 font-mono text-sm">
+									<p class="rounded bg-gray-100 p-2 font-mono text-sm break-all">
 										{data.id}
 									</p>
 								</div>
@@ -259,7 +259,9 @@
 							</div>
 						</div>
 
-						<PerformanceTracker />
+						<div class="mb-8">
+							<PerformanceOverview />
+						</div>
 					</div>
 				{/if}
 			</div>

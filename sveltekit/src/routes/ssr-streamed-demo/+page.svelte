@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PerformanceTracker from '$lib/components/PerformanceTracker/PerformanceTracker.svelte';
+	import PerformanceOverview from '$lib/components/PerformanceTracker/PerformanceOverview.svelte';
 	import type { PageProps } from './$types';
 	const { data }: PageProps = $props();
 
@@ -75,7 +75,7 @@
 					data-sveltekit-preload-data
 					data-sveltekit-preload-code
 					data-sveltekit-reload
-					class="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+					class="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:outline-none"
 				>
 					Refresh Page
 				</a>
@@ -143,7 +143,7 @@
 						<div class="grid gap-4 md:grid-cols-2">
 							<div>
 								<p class="mb-1 text-sm text-gray-500">ID</p>
-								<p class="break-all rounded bg-gray-100 p-2 font-mono text-sm">
+								<p class="rounded bg-gray-100 p-2 font-mono text-sm break-all">
 									{random.id}
 								</p>
 							</div>
@@ -204,7 +204,7 @@
 						</p>
 						<a
 							href="/ssr-streamed-demo"
-							class="mt-2 inline-block rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+							class="mt-2 inline-block rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
 							aria-label="Retry loading streaming data"
 						>
 							Retry Streaming
@@ -213,7 +213,7 @@
 				</div>
 			{/await}
 
-			<PerformanceTracker />
+			<PerformanceOverview />
 		</div>
 
 		<div class="mb-8 rounded-lg bg-white p-6 shadow-lg">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PerformanceTracker from '$lib/components/PerformanceTracker/PerformanceTracker.svelte';
+	import PerformanceOverview from '$lib/components/PerformanceTracker/PerformanceOverview.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -44,7 +44,7 @@
 				<a
 					href="/ssr-demo"
 					data-sveltekit-reload
-					class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+					class="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 				>
 					Refresh Page
 				</a>
@@ -82,7 +82,7 @@
 						<div class="grid gap-4 md:grid-cols-2">
 							<div>
 								<p class="mb-1 text-sm text-gray-500">ID</p>
-								<p class="break-all rounded bg-gray-100 p-2 font-mono text-sm">
+								<p class="rounded bg-gray-100 p-2 font-mono text-sm break-all">
 									{data.random.id}
 								</p>
 							</div>
@@ -107,7 +107,7 @@
 				</div>
 			{/if}
 
-			<PerformanceTracker />
+			<PerformanceOverview />
 		</div>
 
 		<div class={['mb-8 rounded-lg bg-white p-6 shadow-lg']}>
