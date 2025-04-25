@@ -60,6 +60,12 @@
 						color: '#10B981'
 					},
 					{
+						name: 'Unload Event',
+						startTime: tracker.unloadEvent.start ?? 0,
+						duration: tracker.unloadEvent.duration,
+						color: '#F87171'
+					},
+					{
 						name: 'DOM Content Loaded',
 						startTime: tracker.domContentLoaded.start ?? 0,
 						duration: tracker.domContentLoaded.duration,
@@ -76,12 +82,6 @@
 						startTime: tracker.domComplete.start ?? 0,
 						duration: tracker.domComplete.duration,
 						color: '#14B8A6'
-					},
-					{
-						name: 'Unload Event',
-						startTime: tracker.unloadEvent.start ?? 0,
-						duration: tracker.unloadEvent.duration,
-						color: '#F87171'
 					},
 					{
 						name: 'Load Event',

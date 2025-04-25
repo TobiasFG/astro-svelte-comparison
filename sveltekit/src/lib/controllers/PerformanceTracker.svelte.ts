@@ -45,20 +45,12 @@ export class PerformanceTracker {
 
 
             if (performance) {
-
-                $effect.pre(() => {
-                    if (performance) {
-                        performance.mark('hydrateStart');
-                    }
-                })
+                performance.mark('hydrateStart');
 
                 $effect(() => {
-                    if (performance) {
-                        performance.mark('hydrateEnd');
-                        performance.measure('hydrate', 'hydrateStart', 'hydrateEnd');
-                    }
+                    performance.mark('hydrateEnd');
+                    performance.measure('hydrate', 'hydrateStart', 'hydrateEnd');
                 });
-
             }
 
         }

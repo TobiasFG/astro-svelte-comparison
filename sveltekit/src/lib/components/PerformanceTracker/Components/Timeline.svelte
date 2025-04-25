@@ -5,6 +5,7 @@
 	import { BarChart } from 'echarts/charts';
 	import { GridComponent, TooltipComponent, TitleComponent } from 'echarts/components';
 	import { CanvasRenderer } from 'echarts/renderers';
+	import { browser } from '$app/environment';
 
 	echarts.use([BarChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
 
@@ -20,12 +21,18 @@
 	let chartInstance: echarts.ECharts | null = null;
 
 	let options = $derived.by(() => {
-		const data: { name: string; value: [number, number]; itemStyle: { color: string } }[] =
-			metrics.map((m: TimelineMetric) => ({
-				name: m.name,
-				value: [m.startTime, m.duration && m.duration > 0 ? m.duration : 0.5],
-				itemStyle: { color: m.color || '#3B82F6' }
-			}));
+		const startData = metrics.map((m: TimelineMetric) => ({
+			name: m.name,
+			value: m.startTime,
+			itemStyle: { color: 'rgba(0,0,0,0)' },
+			tooltip: { show: false },
+			label: { show: false }
+		}));
+		const durationData = metrics.map((m: TimelineMetric) => ({
+			name: m.name,
+			value: m.duration && m.duration > 0 ? m.duration : 0.5,
+			itemStyle: { color: m.color || '#3B82F6' }
+		}));
 		return {
 			title: {
 				text: 'Performance Gantt Chart',
@@ -34,9 +41,9 @@
 				textStyle: { fontSize: 16 }
 			},
 			tooltip: {
-				formatter: (params: { name: string; value: [number, number] }) => {
-					const { name, value } = params;
-					return `<b>${name}</b><br>Start: ${value[0].toFixed(1)} ms<br>Duration: ${value[1].toFixed(1)} ms<br>End: ${(value[0] + value[1]).toFixed(1)} ms`;
+				formatter: (params: { name: string; value: number; dataIndex: number }) => {
+					const m = metrics[params.dataIndex];
+					return `<b>${m.name}</b><br>Start: ${m.startTime.toFixed(1)} ms<br>Duration: ${(m.duration && m.duration > 0 ? m.duration : 0.5).toFixed(1)} ms<br>End: ${(m.startTime + (m.duration && m.duration > 0 ? m.duration : 0.5)).toFixed(1)} ms`;
 				}
 			},
 			grid: { left: 120, right: 40, top: 40, bottom: 30 },
@@ -49,27 +56,39 @@
 			},
 			yAxis: {
 				type: 'category',
-				data: data.map((d) => d.name),
+				data: metrics.map((m: TimelineMetric) => m.name),
 				axisLabel: { fontSize: 12 },
 				inverse: true
 			},
 			series: [
 				{
 					type: 'bar',
-					data,
+					stack: 'gantt',
+					data: startData,
 					barWidth: 16,
+					itemStyle: { borderRadius: 0 },
+					emphasis: { disabled: true },
+					tooltip: { show: false },
+					label: { show: false }
+				},
+				{
+					type: 'bar',
+					stack: 'gantt',
+					data: durationData,
+					barWidth: 16,
+					itemStyle: { borderRadius: 4 },
 					label: {
 						show: true,
 						position: 'right',
-						formatter(params: { value: [number, number] }) {
-							return `${(params.value[0] + params.value[1]).toFixed(1)} ms`;
+						formatter(params: { dataIndex: number }) {
+							const m = metrics[params.dataIndex];
+							return `${(m.duration && m.duration > 0 ? m.duration : 0.5).toFixed(1)} ms`;
 						},
 						fontSize: 10
-					},
-					itemStyle: { borderRadius: 4 }
+					}
 				}
 			],
-			animationDurationUpdate: 300
+			animationDurationUpdate: 20
 		};
 	});
 
@@ -80,7 +99,7 @@
 	});
 
 	onMount(() => {
-		if (chartDiv) {
+		if (browser && chartDiv) {
 			chartInstance = echarts.init(chartDiv);
 			chartInstance.setOption(options, true);
 			window.addEventListener('resize', resizeChart);
@@ -88,10 +107,10 @@
 	});
 
 	onDestroy(() => {
-		if (chartInstance) {
+		if (browser && chartInstance) {
 			chartInstance.dispose();
+			window.removeEventListener('resize', resizeChart);
 		}
-		window.removeEventListener('resize', resizeChart);
 	});
 
 	function resizeChart() {
