@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { beforeNavigate } from "$app/navigation";
+import { afterNavigate, beforeNavigate } from "$app/navigation";
 import { getContext, onMount, setContext } from "svelte";
 
 export type TimingMetric = {
@@ -32,11 +32,16 @@ export class PerformanceTracker {
     // Svelte hydration
     svelteHydration = $state<TimingMetric>({ start: null, end: null, duration: null });
 
-    totalResourceCount = $state(0);
-    totalResourceFromCacheCount = $state(0);
-    totalResourceDownloadTimeSpent = $state(0);
-    hasBlockingResources = $state(false);
-    recentResources = $state<PerformanceResourceTiming[]>([]);
+    // Soft navigation (SPA) timing
+    spaNavigation = $state<TimingMetric>({ start: null, end: null, duration: null });
+    private spaNavStart: number | null = null;
+
+    // Resource metrics
+    totalResourceCount = 0;
+    totalResourceFromCacheCount = 0;
+    totalResourceDownloadTimeSpent = 0;
+    hasBlockingResources = false;
+    recentResources: PerformanceResourceTiming[] = [];
 
     constructor() {
 
@@ -53,6 +58,22 @@ export class PerformanceTracker {
                 });
             }
 
+            beforeNavigate(() => {
+                // Only track soft navigation if not a full reload
+                this.spaNavStart = performance.now();
+                this.spaNavigation = { start: this.spaNavStart, end: null, duration: null };
+            });
+            afterNavigate(() => {
+                if (this.spaNavStart !== null) {
+                    const end = performance.now();
+                    this.spaNavigation = {
+                        start: this.spaNavStart,
+                        end,
+                        duration: end - this.spaNavStart
+                    };
+                    this.spaNavStart = null;
+                }
+            });
         }
 
         beforeNavigate((navigation) => {

@@ -47,12 +47,22 @@
 						duration: tracker.tls.duration,
 						color: '#10B981'
 					},
-					{
-						name: 'Request',
-						startTime: tracker.request.start ?? 0,
-						duration: tracker.request.duration,
-						color: '#EF4444'
-					},
+					// SPA Navigation (soft tracking) or Request
+					tracker.request.start != null && tracker.response.end != null
+						? {
+								name: 'Request',
+								startTime: tracker.request.start,
+								duration: tracker.request.duration,
+								color: '#EF4444'
+							}
+						: tracker.spaNavigation.start != null && tracker.spaNavigation.duration != null
+							? {
+									name: 'SPA Navigation',
+									startTime: tracker.spaNavigation.start,
+									duration: tracker.spaNavigation.duration,
+									color: '#F59E42'
+								}
+							: undefined,
 					{
 						name: 'Response',
 						startTime: tracker.response.start ?? 0,
@@ -115,9 +125,10 @@
 						duration: tracker.svelteHydration.duration,
 						color: '#6366F1'
 					}
-				].filter(
-					(metric) => metric.duration != null && metric.startTime != null && metric.startTime >= 0
-				)
+				].filter((metric): metric is Exclude<typeof metric, undefined> => {
+					if (!metric) return false;
+					return metric.duration != null && metric.startTime != null && metric.startTime >= 0;
+				})
 			: []
 	);
 
