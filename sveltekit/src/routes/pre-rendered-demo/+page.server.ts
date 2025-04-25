@@ -6,7 +6,7 @@ export const prerender = true;
 export const load: PageServerLoad = async ({ fetch }) => {
     try {
         // Fetch data from our test endpoint - this will only happen at build time
-        const response = await fetch('/api/test');
+        const response = await fetch('/api/test?delay=3000');
 
         // Handle non-2xx responses
         if (!response.ok) {

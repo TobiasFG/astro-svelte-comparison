@@ -9,6 +9,7 @@ export type RandomData = {
 
 export const GET: RequestHandler = async ({ url }) => {
 
+    const delayDuration = parseInt(url.searchParams.get('delay') || '0');
     const randomUUID = crypto.randomUUID();
     const date = new Date();
     const random = {
@@ -20,7 +21,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
     // Make a fake delay of 20 seconds to simulate a slow network
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    return await delay(3000).then(() => {
+    return await delay(delayDuration).then(() => {
         return new Response(JSON.stringify(random), {
             status: 200,
             headers: {

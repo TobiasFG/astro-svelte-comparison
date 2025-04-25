@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
     const dataPromise: Promise<RandomData> = new Promise(async (resolve, reject) => {
         try {
             // Fetch data from our test endpoint
-            const response = await fetch('/api/test');
+            const response = await fetch('/api/test?delay=3000');
 
             // Handle non-2xx responses
             if (!response.ok) {

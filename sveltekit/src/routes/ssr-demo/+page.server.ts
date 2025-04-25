@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
     try {
         // Track API data fetching with detailed metrics
-        const response = await fetch('/api/test');
+        const response = await fetch('/api/test?delay=3000');
 
         // Handle non-2xx responses
         if (!response.ok) {
