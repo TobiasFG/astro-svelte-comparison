@@ -1,5 +1,13 @@
 <!-- filepath: /Users/tfg/Documents/astro-svelte-comparison/sveltekit/src/lib/components/PerformanceTracker/Components/Timeline.svelte -->
 <script lang="ts">
+	import * as echarts from 'echarts/core';
+	import { onMount, onDestroy } from 'svelte';
+	import { BarChart } from 'echarts/charts';
+	import { GridComponent, TooltipComponent, TitleComponent } from 'echarts/components';
+	import { CanvasRenderer } from 'echarts/renderers';
+
+	echarts.use([BarChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
+
 	interface TimelineMetric {
 		name: string;
 		startTime: number;
@@ -8,91 +16,90 @@
 	}
 
 	let { metrics, maxTime } = $props();
+	let chartDiv: HTMLDivElement;
+	let chartInstance: echarts.ECharts | null = null;
 
-	// Calculate styles and positions
-	let metricStyles = $derived(
-		metrics.map((metric: TimelineMetric) => ({
-			left: `${(metric.startTime / maxTime) * 100}%`,
-			width: metric.duration ? `${(metric.duration / maxTime) * 100}%` : '4px',
-			backgroundColor: metric.color || '#3B82F6'
-		}))
-	);
+	let options = $derived.by(() => {
+		const data: { name: string; value: [number, number]; itemStyle: { color: string } }[] =
+			metrics.map((m: TimelineMetric) => ({
+				name: m.name,
+				value: [m.startTime, m.duration && m.duration > 0 ? m.duration : 0.5],
+				itemStyle: { color: m.color || '#3B82F6' }
+			}));
+		return {
+			title: {
+				text: 'Performance Gantt Chart',
+				left: 'center',
+				top: 0,
+				textStyle: { fontSize: 16 }
+			},
+			tooltip: {
+				formatter: (params: { name: string; value: [number, number] }) => {
+					const { name, value } = params;
+					return `<b>${name}</b><br>Start: ${value[0].toFixed(1)} ms<br>Duration: ${value[1].toFixed(1)} ms<br>End: ${(value[0] + value[1]).toFixed(1)} ms`;
+				}
+			},
+			grid: { left: 120, right: 40, top: 40, bottom: 30 },
+			xAxis: {
+				min: 0,
+				max: maxTime,
+				name: 'ms',
+				axisLabel: { fontSize: 12 },
+				splitLine: { show: true, lineStyle: { color: '#eee' } }
+			},
+			yAxis: {
+				type: 'category',
+				data: data.map((d) => d.name),
+				axisLabel: { fontSize: 12 },
+				inverse: true
+			},
+			series: [
+				{
+					type: 'bar',
+					data,
+					barWidth: 16,
+					label: {
+						show: true,
+						position: 'right',
+						formatter(params: { value: [number, number] }) {
+							return `${(params.value[0] + params.value[1]).toFixed(1)} ms`;
+						},
+						fontSize: 10
+					},
+					itemStyle: { borderRadius: 4 }
+				}
+			],
+			animationDurationUpdate: 300
+		};
+	});
 
-	// Create time scale markers
-	let timeMarkers = $derived(
-		[0, 0.25, 0.5, 0.75, 1].map((percent) => ({
-			position: `${percent * 100}%`,
-			value: (maxTime * percent).toFixed(1)
-		}))
-	);
+	$effect(() => {
+		if (chartInstance && options) {
+			chartInstance.setOption(options, true);
+		}
+	});
+
+	onMount(() => {
+		if (chartDiv) {
+			chartInstance = echarts.init(chartDiv);
+			chartInstance.setOption(options, true);
+			window.addEventListener('resize', resizeChart);
+		}
+	});
+
+	onDestroy(() => {
+		if (chartInstance) {
+			chartInstance.dispose();
+		}
+		window.removeEventListener('resize', resizeChart);
+	});
+
+	function resizeChart() {
+		if (chartInstance) chartInstance.resize();
+	}
 </script>
 
 <div class="mb-6 rounded-lg bg-gray-50 p-6 shadow-sm">
 	<h3 class="mb-6 text-lg font-medium text-gray-800">Performance Timeline</h3>
-
-	<div class="relative">
-		<!-- Time scale -->
-		<div class="mb-8 flex justify-between text-xs text-gray-400">
-			{#each timeMarkers as marker}
-				<div class="absolute font-mono" style="left: {marker.position}">
-					{marker.value}ms
-				</div>
-			{/each}
-		</div>
-
-		<!-- Main timeline -->
-		<div class="relative mt-6">
-			<!-- Background grid -->
-			<div class="absolute inset-0">
-				{#each timeMarkers as marker}
-					<div
-						class="absolute bottom-0 top-0 w-px bg-gray-100"
-						style="left: {marker.position}"
-					></div>
-				{/each}
-			</div>
-
-			<!-- Metrics -->
-			<div class="space-y-6">
-				{#each metrics as metric, i}
-					<div class="relative flex items-center gap-4">
-						<!-- Label -->
-						<div class="w-48 text-right">
-							<div class="text-sm font-medium text-gray-700">
-								{metric.name}
-							</div>
-							<div class="text-xs text-gray-500">
-								{metric.startTime.toFixed(1)}ms
-								{#if metric.duration}
-									<span class="text-gray-400">
-										(+{metric.duration.toFixed(1)}ms)
-									</span>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Timeline bar -->
-						<div class="relative flex-1">
-							<div class="absolute h-px w-full bg-gray-200"></div>
-							<div
-								class="absolute h-3 rounded transition-all duration-300"
-								style:left={metricStyles[i].left}
-								style:width={metricStyles[i].width}
-								style:background-color={metricStyles[i].backgroundColor}
-							>
-								{#if metric.duration}
-									<div
-										class="absolute -top-5 left-0 whitespace-nowrap text-[10px] font-medium"
-										style:color={metric.color}
-									>
-										{metric.duration.toFixed(1)}ms
-									</div>
-								{/if}
-							</div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		</div>
-	</div>
+	<div bind:this={chartDiv} style="width: 100%; height: 400px;"></div>
 </div>

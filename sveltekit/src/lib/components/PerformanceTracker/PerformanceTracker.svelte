@@ -115,9 +115,15 @@
 						duration: tracker.svelteHydration.duration,
 						color: '#6366F1'
 					}
-				].filter((metric) => metric.startTime > 0 && metric.duration != null)
+				].filter(
+					(metric) => metric.duration != null && metric.startTime != null && metric.startTime >= 0
+				)
 			: []
 	);
+
+	$effect(() => {
+		console.log('timelineMetrics for chart:', timelineMetrics);
+	});
 
 	let maxTime = $derived(
 		tracker
@@ -156,9 +162,7 @@
 			<h2 class="text-xl font-semibold text-gray-800">Performance Metrics</h2>
 		</div>
 
-		{#if timelineMetrics.length > 0}
-			<Timeline metrics={timelineMetrics} {maxTime} />
-		{/if}
+		<Timeline metrics={timelineMetrics} {maxTime} />
 
 		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 			<div class="rounded-lg bg-gray-50 p-4 shadow-sm">
